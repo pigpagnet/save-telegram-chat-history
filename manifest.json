@@ -1,11 +1,11 @@
 {
   "manifest_version": 2,
 
-  "name": "Save Your Telegram History",
-  "description": "Dumps your Telegram history with an active peer to plaintext.",
+  "name": "Save Telegram Chat History",
+  "description": "Dumps your Telegram chat history with an active peer to plaintext.",
   "version": "1.0.0",
   "author": "pigpag.net",
-  "homepage_url": "https://github.com/pigpagnet/save-your-telegram-history",
+  "homepage_url": "https://github.com/pigpagnet/save-telegram-chat-history",
 
   "icons": {
     "16": "icon16.png",
@@ -16,7 +16,7 @@
   "browser_action": {
     "default_icon": "icon16.png",
     "default_popup": "popup.html",
-    "default_title": "Save your Telegram History"
+    "default_title": "Save Telegram Chat History"
   },
   
   "permissions": [
