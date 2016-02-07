@@ -1,4 +1,4 @@
-Save Your Telegram History
+Save Telegram Chat History
 --------------------------
 
 ###Why this extension?
