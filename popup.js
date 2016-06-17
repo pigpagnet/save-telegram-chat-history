@@ -1,7 +1,11 @@
-function extract(element, el_class, where){
+function extract(element, el_class, attribute, where){
   var text = "";
   $(element+'[class~="'+el_class+'"]', where).each(function(){
-    text = $(this).text(); 
+    if (attribute){
+      text = $(this).attr(attribute);       
+    }else{    
+      text = $(this).text(); 
+    }
   });
   return text;
 }
@@ -13,7 +17,7 @@ function lead(a){
   return s;
 }
 
-function extractHistory(html_str){
+function extractHistory(html_str){  
   var parser = new DOMParser();
   var htmlDoc = parser.parseFromString(html_str, "text/html");
   var jdoc = $(htmlDoc);
@@ -24,14 +28,14 @@ function extractHistory(html_str){
     $('div[class~="im_history_message_wrap"]', $(this)).each(function() {
       //extract current date split
       $('div[class~="im_message_date_split"]', $(this)).each(function(){
-        $('div[class~="im_service_message"]', $(this)).each(function(){
-	  curDate = $(this).text();
+        $('span[class~="im_message_date_split_text"]', $(this)).each(function(){
+          curDate = $(this).text();
         });
       });
       //proceed with messages
-      var text = extract('div','im_message_text', $(this));
-      var author = extract('a','im_message_author', $(this));
-      var time = extract('span','im_message_date', $(this));  
+      var text = extract('div','im_message_text', null, $(this));
+      var author = extract('a','im_message_author', null, $(this));
+      var time = extract('span','im_message_date', 'data-content', $(this));  
       var fullDateStr = curDate + ", " + time;
       var d = new Date(Date.parse(fullDateStr));
       curDateFormatted = lead(d.getDate())+'.'+lead(d.getMonth()+1)+'.'+d.getFullYear() + ' ' + lead(d.getHours()) + ':' + lead(d.getMinutes()) + ':' + lead(d.getSeconds());    
