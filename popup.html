@@ -14,14 +14,32 @@
         min-height: 300px;
         max-height: 300px;
       }
+      #txtAreaStatus{
+        overflow-y: scroll; 
+        min-width: 450px;
+        max-width: 450px;
+        min-height: 34px;
+        max-height: 34px;
+        background-color: lightgrey;
+      }
+      #btnFetchHistory{
+        min-width: 200px;
+        max-width: 200px;
+        min-height: 40px;
+        max-height: 40px;
+      }
+      .row_cell{
+        float:left;
+        margin:0;
+      }
     </style>
     <script src="jquery-1.12.0.min.js"></script>
     <script src="popup.js"></script>
   </head>
   <body>
     <textarea id="myTextarea"></textarea>
-	<!-- <button id="btnFetchHistory" type="button" onclick="">Fetch some history</button> -->
-    <textarea id="myTextAreaTest" class="classOne classTwo"></textarea>
+    <div class='row_cell'><button id="btnFetchHistory" type="button"></button></div>
+    <div class='row_cell'><textarea id="txtAreaStatus" readonly></textarea></div>
   </body>
 </html>
 
