@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Save Telegram Chat History Options</title>
+  <style type="text/css">
+    td.visible{
+      border: 1px solid;
+      padding: 5px;
+      cursor: pointer;
+    }  
+    .selected{
+      background-color: brown;
+      color: white;
+    }
+    code {
+      font-family: monospace;
+    }
+    #sampleOutput{
+      overflow-y: scroll; 
+      min-width: 450px;
+      max-width: 450px;
+      min-height: 100px;
+      max-height: 100px;
+      background-color: lightgrey;
+    }
+  </style>
+  <script src="jquery-1.12.0.min.js"></script>
+  <script src="logic.js"></script>
+  <script src="options.js"></script>
+</head>
+<body>
+<h2>Save Telegram Chat History Options</h2>
+
+<table>
+<tr>
+  <td>
+	<table id="table"></table>
+  </td>
+</tr>
+<tr>
+  <td>
+	<button id="tryFormat">Try format</button>
+   </td>
+ </tr>
+ <tr>
+  <td colspan="2">
+	 <textarea id="sampleOutput"> </textarea>
+	</td>
+ </tr>
+ <tr>
+  <td>	
+	<button id="save">Save Preferences</button>	
+  </td>
+  <td><div id="status"></div></td>
+</tr>
+<tr>
+  <td colspan="2">
+    <div><br/>
+    	Hint:<br/>
+<br/>
+You can create your own formats. Check out the following special symbols:<br/>
+<br/>
+dt = Date-time of the message.<br/>
+u = Sender's name.<br/>
+m = Message body.<br/>
+\n = New line.<br/>
+\t = Tab character.<br/>
+    </div>
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

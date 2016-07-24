@@ -17,6 +17,8 @@ Perhaps, many of us use and like Telegram messenger for conversations with frien
 ###Features
 * Shows your history with a Telegram peer as text.
 * Works even for DELETED accounts.
+* Autoscroll history (since 1.2.0).
+* You can configure the output format (since 1.3.0).
 
 ###Requirements
 * Chrome browser (48+), not tested on older versions.
