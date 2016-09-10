@@ -17,6 +17,8 @@ function extract(el_class, attribute, where){
   return text;
 }
 
+
+
 function extractHistory(html_str){  
   var timeStart = new Date()
   var parser = new DOMParser();
@@ -32,30 +34,29 @@ function extractHistory(html_str){
       // extract the current date split
       $('.im_message_date_split', $(this)).each(function(){
         $('.im_message_date_split_text', $(this)).each(function(){
-          curDate = $(this).text();          
+          curDate = $(this).text();
+          curDate = parseFullDate(curDate);
         });
       });
       // proceed with messages
       var text = extract('im_message_text', null, $(this));
       var author = extract('im_message_author', null, $(this));
-      var time = extract('im_message_date', 'data-content', $(this));
-      var fullDateStr = curDate + ", " + time;
-      var d = new Date(Date.parse(fullDateStr));
-      curDateFormatted = formatDate(d);
-      var msgFormatted = formatMsg(currentFormat,curDateFormatted,author,text);
+      var time = extract('im_message_date', 'data-content', $(this)); //hh:mm:ss
+      var curDateTimeFormatted = curDate + " " +  prepareTime(time);
+      var msgFormatted = formatMsg(currentFormat,curDateTimeFormatted,author,text);
       textArea += "\n" + msgFormatted;
       if (firstDate == null){
-        firstDate = d;
+        firstDate = curDate;
       }
       msgCnt += 1;
     });
-  });  
+  });
   $('#myTextarea').val(textArea);
   var elapsedTime = new Date()-timeStart;
   var logMsg = 'Working time: '+elapsedTime+' ms.' 
     + ' Size ' + textArea.length
     + '\nNumber of messages ' + msgCnt + '.'
-    + ' History from ' + getDatePart(firstDate);
+    + ' History from ' + firstDate;
   console.log(logMsg);
   $('#txtAreaStatus').val(logMsg);
 }
@@ -90,9 +91,14 @@ function fetchAvailableHistory(){
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, {text: 'telegram_dom_request'}, function(response){
       //console.log('Received ' + response.text.length + ' bytes of response.');
-      extractHistory(response.text);
-      if (load_history_active){
-        setTimeout(fetchAvailableHistory,2000);
+      if (undefined != response){
+        extractHistory(response.text);
+        if (load_history_active){
+          setTimeout(fetchAvailableHistory,2000);
+        }
+      }else{
+        //TODO undefined! do smth useful!
+        console.log('no response from the main tab.');
       }
     });
   });
