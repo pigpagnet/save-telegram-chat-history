@@ -51,6 +51,12 @@ function extractHistory(html_str){
       msgCnt += 1;
     });
   });
+  if (firstDate == null){
+    textArea += "\n" + "It appears that you haven't selected a peer user, or history is empty.";
+    document.getElementById("btnFetchHistory").disabled = true;
+  }else{
+    document.getElementById("btnFetchHistory").disabled = false;
+  }
   $('#myTextarea').val(textArea);
   var elapsedTime = new Date()-timeStart;
   var logMsg = 'Working time: '+elapsedTime+' ms.' 
@@ -99,6 +105,7 @@ function fetchAvailableHistory(){
       }else{
         //TODO undefined! do smth useful!
         console.log('no response from the main tab.');
+        $('#myTextarea').val("To save telegram chat history, you need to visit https://web.telegram.org first.");
       }
     });
   });
