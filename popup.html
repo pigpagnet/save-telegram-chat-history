@@ -22,25 +22,28 @@
         max-height: 34px;
         background-color: lightgrey;
       }
-      #btnFetchHistory{
-        min-width: 200px;
-        max-width: 200px;
+      
+      .btnLoad{
+        min-width: 50px;
+        max-width: 50px;
         min-height: 40px;
         max-height: 40px;
-      }      
+      }
       .row_cell{
         float:left;
         margin:0;
       }
     </style>
     <script src="jquery-1.12.0.min.js"></script>
-    <script src="constants.js"></script>
-    <script src="logic.js"></script>
+    <script src="angular-1.5.8.min.js"></script>
     <script src="popup.js"></script>
   </head>
   <body>
     <textarea id="myTextarea"></textarea>
-    <div class='row_cell'><button id="btnFetchHistory" type="button" disabled></button></div>
+    <div class='row_cell'><button class="btnLoad" id="btnFetchHistoryAll" type="button" disabled></button></div>
+    <div class='row_cell'><button class="btnLoad" id="btnFetchHistory1" type="button" disabled></button></div>
+    <div class='row_cell'><button class="btnLoad" id="btnFetchHistory2" type="button" disabled></button></div>
+    <div class='row_cell'><button class="btnLoad" id="btnFetchHistory3" type="button" disabled></button></div>
     <div class='row_cell'><textarea id="txtAreaStatus" readonly></textarea></div>
   </body>
 </html>
