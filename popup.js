@@ -126,7 +126,7 @@ function checkConnection(){
         //TODO undefined! do smth useful!
         connectionOK = false
         console.log('no response from the main tab.');
-        $('#myTextarea').val("To save your telegram chat history, you need to visit https://web.telegram.org first.");
+        $('#myTextarea').val("To save your telegram chat history, you first need to visit https://web.telegram.org, login, and select one of your contacts.");
       }
     });
   });
