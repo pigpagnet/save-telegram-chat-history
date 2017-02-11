@@ -65,7 +65,7 @@ function displayMessages(msg){
     var msgFormatted = formatMsg(currentFormat,curDateTimeFormatted,author,text);
     textArea += "\n" + msgFormatted;
   }
-  $('#myTextarea').val(textArea);
+  $('#myTextarea').html(textArea).text()
   //Update status
   var elapsedTime = new Date()-last_request_time
   var logMsg = ' History from ' + firstDate+"."
