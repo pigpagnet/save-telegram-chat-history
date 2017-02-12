@@ -27,11 +27,14 @@ chrome.runtime.onMessage.addListener(function (request_msg, sender, sendResponse
         sendResponse({text : "OK"})
     }
     if (request_msg.text === 'stch_load_current_history') {
-    	document.dispatchEvent(new CustomEvent('to_injected_current', {}));
+        document.dispatchEvent(new CustomEvent('to_injected_current', {}));
     }
     if (request_msg.text === 'stch_load_more_history') {
         document.dispatchEvent(new CustomEvent('to_injected_get_more', 
-        	{'detail':request_msg.value}));
+            {'detail':request_msg.value}));
+    }
+    if (request_msg.text === 'stch_open_photos') {
+        document.dispatchEvent(new CustomEvent('to_injected_open_photos',{}));
     }
     /*if (request_msg.text === 'stch_start_scrolling_up'){
       keep_scrolling = true;

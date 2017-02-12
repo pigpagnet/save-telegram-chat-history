@@ -37,16 +37,11 @@ keep_scrolling = false
 min_time_between_requests = 2000
 var last_request_time = new Date()
 
-//TODO textArea += "\n" + "It appears that you haven't selected a peer user, or history is empty.";
-/* $('#myTextarea').val(textArea);
-var elapsedTime = new Date()-timeStart;
-  var logMsg = 'Working time: '+elapsedTime+' ms.' 
-    + ' Size ' + textArea.length
-    + '\nNumber of messages ' + msgCnt + '.'
-    + ' History from ' + firstDate;
-  console.log(logMsg);
-  $('#txtAreaStatus').val(logMsg);
-*/
+myTextAreaLineNumber = -1
+
+function getLineNumber(textarea) {
+  return textarea.value.substr(0, textarea.selectionStart).split("\n").length
+}
 
 function displayMessages(msg){
   var textArea = "Your Telegram History\n"
@@ -62,10 +57,14 @@ function displayMessages(msg){
       author += "(you)";
     }
     var text = msgWrap.text
-    var msgFormatted = formatMsg(currentFormat,curDateTimeFormatted,author,text);
+    var metainfo = msgWrap.metainfo
+    if (metainfo.length > 0)
+      metainfo = '[[' + metainfo + ']]'
+    var msgFormatted = formatMsg(currentFormat,curDateTimeFormatted,author, metainfo + text);
     textArea += "\n" + msgFormatted;
   }
   $('#myTextarea').html(textArea).text()
+  renderCountPhotos(msg.detail.countPhotos)
   //Update status
   var elapsedTime = new Date()-last_request_time
   var logMsg = ' History from ' + firstDate+"."
@@ -73,8 +72,8 @@ function displayMessages(msg){
          + '\n '+messages.length+' messages out of '+ countMessages
          + ' ('+Math.floor(100 * messages.length / countMessages)+'%).'
          + ' Time ' + elapsedTime/1000.0 + ' sec.'
-  console.log(logMsg);
-  $('#txtAreaStatus').val(logMsg);
+  console.log(logMsg)
+  $('#txtAreaStatus').val(logMsg)
 }
 
 function communicate(commandText, value){
@@ -106,6 +105,7 @@ function requestMoreHistory(limit){
 
 var butIDs = ['btnFetchHistoryAll', 'btnFetchHistory1', 
               'btnFetchHistory2', 'btnFetchHistory3' ]
+//              'btnOpenPhoto' ]
 
 function enableButtons(enable){
   for(var i=0; i<butIDs.length; i++){
@@ -151,6 +151,12 @@ function prepareButton(butId, limit, limitText){
   document.getElementById(butId).innerHTML = 'Load '+limitText;
 }
 
+function renderCountPhotos(cntPhotos){
+  var butId = "btnOpenPhoto"
+  document.getElementById(butId).disabled = cntPhotos == 0
+  document.getElementById(butId).innerHTML = 'Open photos';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   chrome.storage.sync.get(defaultMapFormats, function(items) {
     var fmtSelected = items['selected']
@@ -162,5 +168,22 @@ document.addEventListener('DOMContentLoaded', function() {
     prepareButton('btnFetchHistory2',limit2,limit2)
     prepareButton('btnFetchHistory3',limit3,limit3)
     checkConnection()
+
+    $('#btnOpenPhoto').click(function (){
+      communicate('stch_open_photos')
+      //enableButtons(true)
+    });
+    //document.getElementById("btnOpenPhoto").innerHTML = 'Open photos';
+    $('#myTextarea').keyup(function(){    
+      myTextAreaLineNumber = getLineNumber(this)
+      console.log(""+myTextAreaLineNumber)
+    })
+    $('#myTextarea').mouseup(function(){
+      //this.keyup()
+      myTextAreaLineNumber = getLineNumber(this)
+      console.log(""+myTextAreaLineNumber)
+    })
   });
 });
+
+
