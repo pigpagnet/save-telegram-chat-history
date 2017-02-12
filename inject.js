@@ -103,9 +103,9 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,tim
 			var msgSender = msgWrap.fromID // ID
 			var msgMetaInfo = ''
 			if (!(msgSender in peerIDs)){
-				//peerIDs[msgSender] = AppUsrMng.getUserString(msgSender)
 				var userObject = AppUsrMng.getUser(msgSender)
-				var fFirstName = userObject.rFirstName.toString()
+				//var fFirstName = userObject.rFirstName.toString()
+				var fFirstName = userObject.rFullName.toString()
 				peerIDs[msgSender] = fFirstName
 			}
 			if (msgWrap.media){
