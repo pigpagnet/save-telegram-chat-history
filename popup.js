@@ -43,6 +43,10 @@ function getLineNumber(textarea) {
   return textarea.value.substr(0, textarea.selectionStart).split("\n").length
 }
 
+function getLineNumberFromString(str){
+  return str.split("\n").length
+}
+
 function displayMessages(msg){
   var textArea = "Your Telegram History\n"
   var messages = msg.detail.historyMessages
@@ -68,8 +72,9 @@ function displayMessages(msg){
   //Update status
   var elapsedTime = new Date()-last_request_time
   var logMsg = ' History from ' + firstDate+"."
-         + ' Size ' + textArea.length +' bytes.'
-         + '\n '+messages.length+' messages out of '+ countMessages
+         + ' Size: ' + friendlySize(textArea.length) +' characters,'
+         + ' ' + friendlySize(getLineNumberFromString($('#myTextarea').val())) + ' lines.'
+         + '\n '+friendlySize(messages.length)+' messages out of '+ friendlySize(countMessages)
          + ' ('+Math.floor(100 * messages.length / countMessages)+'%).'
          + ' Time ' + elapsedTime/1000.0 + ' sec.'
   console.log(logMsg)
@@ -79,6 +84,7 @@ function displayMessages(msg){
 function communicate(commandText, value){
   enableButtons(false)
   last_request_time = new Date()
+  startProgress()
   console.log("sending "+commandText);
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, {text: commandText, value: value}, null);
@@ -103,15 +109,51 @@ function requestMoreHistory(limit){
   communicate('stch_load_more_history', limit);
 }
 
-var butIDs = ['btnFetchHistoryAll', 'btnFetchHistory1', 
-              'btnFetchHistory2', 'btnFetchHistory3' ]
-//              'btnOpenPhoto' ]
-
 function enableButtons(enable){
-  for(var i=0; i<butIDs.length; i++){
-    document.getElementById(butIDs[i]).disabled = !enable
+  $('button').attr('disabled', !enable)
+  if (enable){
+    isShowProgress = false
   }
 }
+
+//--------------ProgressBar part
+
+var isShowProgress = false
+
+function showProgress(){
+  // last_request_time
+  var t = new Date().getTime()
+  var elapsed_sec = Math.floor((t - last_request_time) / 100) / 10
+  var elapsed_min = Math.floor(elapsed_sec / 60)
+  var str = "" + elapsed_sec 
+  if (str.length<2 || str.charAt(str.length-2)!='.'){
+    str += '.0'
+  }
+  str += "s"
+  if (elapsed_min > 0){
+    str = elapsed_min + 'm ' + str
+  }
+  if (elapsed_sec > 0.99){
+    $('#progressBar').text(str)
+  }
+  if (isShowProgress){
+    setTimeout(showProgress, 200);
+  }else{
+    $('#progressBar').text('')
+  }
+}
+
+function startProgress(){
+  isShowProgress = true
+  showProgress()
+}
+
+function stopProgress(){
+  isShowProgress = false
+  $('#progressBar').text('')
+}
+
+//--------------- end of ProgressBar part
 
 function checkConnection(){
   console.log("Checking connection with main page.")
@@ -121,7 +163,7 @@ function checkConnection(){
         connectionOK = true
         console.log('connection to main page: ok');
         enableButtons(true)
-        requestCurrentHistory();
+        requestCurrentHistory()
       }else{
         //TODO undefined! do smth useful!
         connectionOK = false
@@ -139,16 +181,12 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
   })
 })
 
-var limit1 = 20
-var limit2 = 200
-var limit3 = 2000
 var limitMAX = 200000000
 
-function prepareButton(butId, limit, limitText){
+function prepareButton(butId, limit){
   $('#'+butId).click(function (){
     requestMoreHistory(limit)
   });
-  document.getElementById(butId).innerHTML = 'Load '+limitText;
 }
 
 function renderCountPhotos(cntPhotos){
@@ -163,27 +201,35 @@ document.addEventListener('DOMContentLoaded', function() {
     currentFormat = prepareFormat(items[fmtSelected])
     
     // Prepare page
-    prepareButton('btnFetchHistoryAll',limitMAX,'all')
-    prepareButton('btnFetchHistory1',limit1,limit1)
-    prepareButton('btnFetchHistory2',limit2,limit2)
-    prepareButton('btnFetchHistory3',limit3,limit3)
+    //$('#progressBar').text('')
+    $('#loadHistory .btnLoadGrid').click(function(){
+      var s = this.innerText
+      if (s == 'all'){
+        requestMoreHistory(limitMAX)
+      }else{
+        s = s.replace('k','000')
+        s = s.replace(' ','')
+        var limit = parseInt(s)
+        requestMoreHistory(limit)
+      }
+    })
     checkConnection()
 
     $('#btnOpenPhoto').click(function (){
       communicate('stch_open_photos')
       //enableButtons(true)
-    });
+    })
     //document.getElementById("btnOpenPhoto").innerHTML = 'Open photos';
     $('#myTextarea').keyup(function(){    
-      myTextAreaLineNumber = getLineNumber(this)
-      console.log(""+myTextAreaLineNumber)
+      myTextAreaLineNumber = getLineNumber(this.value)
+      //console.log(""+myTextAreaLineNumber)
     })
     $('#myTextarea').mouseup(function(){
       //this.keyup()
-      myTextAreaLineNumber = getLineNumber(this)
-      console.log(""+myTextAreaLineNumber)
+      myTextAreaLineNumber = getLineNumber(this.value)
+      //console.log(""+myTextAreaLineNumber)
     })
-  });
-});
+  })
+})
 
 

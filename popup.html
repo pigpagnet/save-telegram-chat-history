@@ -2,35 +2,50 @@
 <html>
   <head>
     <title>Save Telegram Chat History</title>
+    <!-- 
+      
+    -->
     <style>
       body {
         font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
         font-size: 100%;
-      }      
+      }
       #myTextarea{
         overflow-y: scroll; 
-        min-width: 720px;
-        max-width: 720px;
+        min-width: 740px;
+        max-width: 740px;
         min-height: 300px;
         max-height: 300px;
       }
       #txtAreaStatus{
         overflow-y: scroll; 
-        min-width: 450px;
-        max-width: 450px;
+        min-width: 636px;
+        max-width: 636px;
         min-height: 34px;
         max-height: 34px;
         background-color: lightgrey;
       }
-      .btnLoad{
-        min-width: 50px;
-        max-width: 50px;
-        min-height: 40px;
-        max-height: 40px;
+      .btnLoadGrid{
+        min-width: 52px;
+        max-width: 52px;
+        min-height: 25px;
+        max-height: 25px;
+      }
+      .row_cell_heigth{
+        min-height: 25px;
+        max-height: 25px;
+      }
+      td {
+        border: 0px solid black;
+        padding:0; margin:0;
+      }
+      .tableGrid {
+        border-collapse: collapse;
+        border-spacing: 0;
       }
       .btnPhoto{
-        min-width: 70px;
-        max-width: 70px;
+        min-width: 52px;
+        max-width: 52px;
         min-height: 40px;
         max-height: 40px;
       }
@@ -38,18 +53,49 @@
         float:left;
         margin:0;
       }
+      .row_cell_right{
+        float:right;
+        margin:0;
+      }
+      .separator{
+        margin-top: 0.3cm
+      }
+      
     </style>
     <script src="jquery-1.12.0.min.js"></script>
     <script src="angular-1.5.8.min.js"></script>
+    <script src="generic_tools.js"></script>
     <script src="popup.js"></script>
   </head>
   <body>
     <textarea id="myTextarea" ></textarea>
-    <div class='row_cell'><button class="btnLoad" id="btnFetchHistoryAll" type="button" disabled></button></div>
-    <div class='row_cell'><button class="btnLoad" id="btnFetchHistory1" type="button" disabled></button></div>
-    <div class='row_cell'><button class="btnLoad" id="btnFetchHistory2" type="button" disabled></button></div>
-    <div class='row_cell'><button class="btnLoad" id="btnFetchHistory3" type="button" disabled></button></div>
+    <div class='container separator'>
+      <table class='tableGrid row_cell row_cell_heigth '>
+        <tr><td><div class='row_cell'>Load</div></td></tr>
+      </table>
+      
+      <table id='loadHistory' class='tableGrid row_cell_right'>
+        <tr>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistoryAll" type="button" disabled>all</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory20" type="button" disabled>20</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory50" type="button" disabled>50</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory100" type="button" disabled>100</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory200" type="button" disabled>200</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory500" type="button" disabled>500</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory1000" type="button" disabled>1 k</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory2000" type="button" disabled>2 k</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory5000" type="button" disabled>5 k</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory10000" type="button" disabled>10 k</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory20000" type="button" disabled>20 k</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory50000" type="button" disabled>50 k</button></div></td>
+          <td><div class='row_cell'><button class="btnLoadGrid" id="btnFetchHistory100000" type="button" disabled>100 k</button></div></td>
+        </tr>
+      </table>
+    </div>
     <div class='row_cell'><textarea id="txtAreaStatus" readonly></textarea></div>
-    <div class='row_cell'><button class="btnPhoto" id="btnOpenPhoto" type="button" disabled></button></div>
+    <table class='tableGrid row_cell row_cell_heigth '>
+      <tr><td><div id='progressBar' class='row_cell btnLoadGrid' readonly></div></td></tr>
+    </table>
+    <div class='row_cell_right'><button class="btnPhoto" id="btnOpenPhoto" type="button" disabled></button></div>
   </body>
 </html>

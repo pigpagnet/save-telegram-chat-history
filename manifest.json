@@ -33,5 +33,5 @@
     "storage"
   ],
   
-  "web_accessible_resources": ["inject.js"]
+  "web_accessible_resources": ["generic_tools.js","inject.js"]
 }

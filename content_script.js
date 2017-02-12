@@ -1,9 +1,14 @@
-var s = document.createElement('script');
-s.src = chrome.extension.getURL('inject.js');
-(document.head||document.documentElement).appendChild(s);
-//s.onload = function() {
-//    s.parentNode.removeChild(s);
-//};
+function inject_script(script_name){
+	var s = document.createElement('script');
+	s.src = chrome.extension.getURL(script_name);
+	(document.head||document.documentElement).appendChild(s);
+	//s.onload = function() {
+	//    s.parentNode.removeChild(s);
+	//};
+}
+
+inject_script('generic_tools.js')
+inject_script('inject.js')
 console.log("script injected.")
 
 document.addEventListener('from_injected', function(e) {
