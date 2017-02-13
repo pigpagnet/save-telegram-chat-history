@@ -9,9 +9,7 @@ var peerIDs // {id: name}
 var historyMessages
 var maxID
 var countMessages
-var lastMediaMsgId
-var lastPhotoId
-var photosCnt
+var photo_ids // {'msg_id', 'photo_id'}
 var photosData
 
 // Argument is of type Date.
@@ -36,19 +34,18 @@ function clear(){
 	historyMessages = []
 	maxID = 0
 	countMessages = -1
-	lastMediaMsgId = 0
-	lastPhotoId = 0
-	photosCnt = 0
+	photo_ids = []
 	photosData = []
 	console.log('cleared')
 }
 
-function storeMessage(messageDate, messageSender, messageTxt, messageMetaInfo){
+function storeMessage(messageDate, messageSender, messageTxt, messageMetaInfo, hiddenInfo){
 	historyMessages.push({
 		date: messageDate,
 		sender: messageSender,
 		text: messageTxt,
-		metainfo: messageMetaInfo
+		metainfo: messageMetaInfo, // to display
+		hiddeninfo: hiddenInfo, // e.g. {mes_id:"", photo_id:""}
 	})
 }
 
@@ -87,13 +84,13 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,tim
 		}
 		var messageIDs = res.$$state.value.history
 		var time2 = new Date().getTime()
-		var tmpPhotosCnt = 0
-		for(var i=0; i<messageIDs.length; i++){
+		for(var i=0; i<messageIDs.length; i++){ //what order? date decreasing?
 			var msgWrap = AppMesMng.wrapForHistory(messageIDs[i])
 			var msgTxt = msgWrap.message
 			var msgDate = formatDate(new Date(msgWrap.date * 1000))
 			var msgSender = msgWrap.fromID // ID
 			var msgMetaInfo = ''
+			var msgHiddenInfo = {msg_id: messageIDs[i]}
 			if (!(msgSender in peerIDs)){
 				var userObject = AppUsrMng.getUser(msgSender)
 				//var fFirstName = userObject.rFirstName.toString()
@@ -104,14 +101,10 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,tim
 				console.log('found media type of the message, date = '+msgDate)
 				switch (msgWrap.media._) {
 					case 'messageMediaPhoto':
-						//console.log('found a photo')
 						var photoId = msgWrap.media.photo.id
 						//AppPhotMng.downloadPhoto(photoId)
-						if (lastPhotoId == 0){
-							lastMediaMsgId = messageIDs[i]
-							lastPhotoId = photoId
-						}
-						tmpPhotosCnt++
+						photo_ids.push({photo_id: photoId, message_id: messageIDs[i]})
+						msgHiddenInfo.photo_id = photoId
 						msgMetaInfo = 'Photo'
 						msgTxt = msgWrap.media.caption
 						break
@@ -179,9 +172,8 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,tim
 						console.log('found unknown type of media: '+msgWrap.media._)
 				}
 			}
-			storeMessage(msgDate,msgSender,msgTxt,msgMetaInfo)
+			storeMessage(msgDate,msgSender,msgTxt,msgMetaInfo,msgHiddenInfo)
 		}
-		photosCnt = tmpPhotosCnt
 		maxID = messageIDs[messageIDs.length-1]
 		console.log("fetched "+messageIDs.length+" messages in "
 			+(time2-time1)/1000.0+" sec.")
@@ -254,10 +246,17 @@ document.addEventListener ("to_injected_current", function(){
 document.addEventListener ("to_injected_open_photos", function(e){	
 	var injector = angular.element(document).injector()
 	var AppPhotManager = injector.get('AppPhotosManager')
-	if (lastMediaMsgId > 0 && lastPhotoId > 0){
-		AppPhotManager.openPhoto(lastPhotoId, {m: lastMediaMsgId})
+	if (photo_ids.length > 0){
+		if (e.detail){
+			var str = e.detail.split(",")
+			var photoId = str[0]
+			var mesId = str[1]
+			AppPhotManager.openPhoto(photoId, {m: mesId})
+		}else{
+			var pos = 0
+			AppPhotManager.openPhoto(photo_ids[pos]['photo_id'], {m: photo_ids[pos]['message_id']})
+		}
 	}else{
 		console.log('No photos found for current history.')
 	}
-	
 }, false);

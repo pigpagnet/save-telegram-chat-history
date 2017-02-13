@@ -39,7 +39,8 @@ chrome.runtime.onMessage.addListener(function (request_msg, sender, sendResponse
             {'detail':request_msg.value}));
     }
     if (request_msg.text === 'stch_open_photos') {
-        document.dispatchEvent(new CustomEvent('to_injected_open_photos',{}));
+        document.dispatchEvent(new CustomEvent('to_injected_open_photos',
+            {'detail':request_msg.value}));
     }
     /*if (request_msg.text === 'stch_start_scrolling_up'){
       keep_scrolling = true;

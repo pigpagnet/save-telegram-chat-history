@@ -13,11 +13,15 @@
     "128": "icon128.png"
   },
 
+  "background": {
+    "page": "background.html"
+  },
+
   "browser_action": {
     "default_icon": "icon16.png",
     "default_popup": "popup.html",
     "default_title": "Save Telegram Chat History"
-  },   
+  },
   
   "content_scripts": [
     {
