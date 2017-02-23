@@ -1,30 +1,7 @@
-// Constants
-defaultMapFormats = {
-  formatCompact:"dt, u: m",
-  formatLarge:"u [dt]\\nm\\n",
-  formatCustom:"",
-  selected:"formatCompact",  
-};
 
-function formatMsg(format, datetime, username, text){
-  var msg = format;
-  var mapObj = {
-    dt:datetime,
-    u:username,
-    m:text,
-  };
-  var re = new RegExp(Object.keys(mapObj).join("|"),"gi");
-  msg = msg.replace(re, function(matched){
-    return mapObj[matched];
-  });
-  return msg;
-}
 
-function prepareFormat(format) {
-  format = format.replace(/\\n/g, "\n");
-  format = format.replace(/\\t/g, "\t");
-  return format;
-}
+
+
 
 // User settings variables
 currentFormat = null;

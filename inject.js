@@ -12,21 +12,7 @@ var countMessages
 var photo_ids // {'msg_id', 'photo_id'}
 var photosData
 
-// Argument is of type Date.
-// Some examples:
-//   d = new Date();  // current date
-//   d.setMonth(d.getMonth() - 3); // set 3 month prior to date
-function formatDate(d){
-	return lead(d.getDate())+'.'+lead(d.getMonth()+1)+'.'+d.getFullYear() + ' ' 
-		+ lead(d.getHours()) + ':' + lead(d.getMinutes()) + ':' + lead(d.getSeconds());
-}
 
-function lead(a){
-	var s = '0' + a;
-	if (s.length>2)
-		s = s.substr(1);
-	return s;
-}
 
 function clear(){
 	historyForPeerID = 0
