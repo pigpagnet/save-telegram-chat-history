@@ -38,6 +38,11 @@ function formatDate(d){
     + lead(d.getHours()) + ':' + lead(d.getMinutes()) + ':' + lead(d.getSeconds());
 }
 
+function formatDateForFileName(d){
+  return d.getFullYear() + '_' +lead(d.getMonth()+1)+'_' + lead(d.getDate()) +'--'
+    + lead(d.getHours()) + '-' + lead(d.getMinutes()) + '-' + lead(d.getSeconds());
+}
+
 function lead(a){
   var s = '0' + a;
   if (s.length>2)

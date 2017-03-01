@@ -79,9 +79,8 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,tim
 			var msgHiddenInfo = {msg_id: messageIDs[i]}
 			if (!(msgSender in peerIDs)){
 				var userObject = AppUsrMng.getUser(msgSender)
-				//var fFirstName = userObject.rFirstName.toString()
-				var fFirstName = userObject.rFullName.toString()
-				peerIDs[msgSender] = fFirstName
+				var fName = userObject.rFullName.toString()
+				peerIDs[msgSender] = fName
 			}
 			if (msgWrap.media){
 				console.log('found media type of the message, date = '+msgDate)

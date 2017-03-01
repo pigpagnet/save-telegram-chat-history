@@ -1,8 +1,3 @@
-
-
-
-
-
 // User settings variables
 currentFormat = null;
 
@@ -28,8 +23,11 @@ function getLineNumberFromString(str){
 var ReceivedMsg
 var LinesAfterMessages
 
+var NamePeer
+
 function displayMessages(msg){
   var textArea = "Your Telegram History\n"
+  NamePeer = msg.detail.peerIDs[msg.detail.peerID]
   var messages = msg.detail.historyMessages
   var countMessages = msg.detail.countMessages
   var firstDate = messages[messages.length-1].date
@@ -65,6 +63,7 @@ function displayMessages(msg){
     restoreTextareaScroll('#myTextarea')
   }
   renderCountPhotos(msg.detail.countPhotos)
+  renderSaveAs()
   //Update status
   var elapsedTime = new Date()-last_request_time
   var logMsg = ' History from ' + firstDate+"."
@@ -201,6 +200,12 @@ function renderCountPhotos(cntPhotos){
   but3.innerHTML = 'Cursor next photo'
 }
 
+function renderSaveAs(){
+  var but = document.getElementById("btnSaveAs")
+  but.disabled = isShowProgress
+  but.innerHTML = 'Save As Text'
+}
+
 function restoreTextareaScroll(textarea){
   var value = chrome.extension.getBackgroundPage().textAreaScroll
   $(textarea).scrollTop(value)
@@ -260,6 +265,12 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     $('#btnOpenNextPhoto').click(function(){
       openPhoto(-1) // inversed order
+    })
+    $('#btnSaveAs').click(function(){
+      var text = $('#myTextarea').val()
+      var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+      var dateSave = formatDateForFileName(new Date)
+      saveAs(blob, "telegram_chat_history__"+NamePeer+"__"+dateSave+".txt");
     })
 
     $('#myTextarea').keyup(function(){

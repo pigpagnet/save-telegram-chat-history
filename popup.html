@@ -12,8 +12,8 @@
       }
       #myTextarea{
         overflow-y: scroll; 
-        min-width: 740px;
-        max-width: 740px;
+        min-width: 760px;
+        max-width: 760px;
         min-height: 300px;
         max-height: 300px;
       }
@@ -43,7 +43,7 @@
         border-collapse: collapse;
         border-spacing: 0;
       }
-      .btnPhoto{
+      .btnPhoto .btnSaveAs{
         min-width: 52px;
         max-width: 52px;
         min-height: 50px;
@@ -64,6 +64,7 @@
     </style>
     <script src="jquery-1.12.0.min.js"></script>
     <script src="angular-1.5.8.min.js"></script>
+    <script src="FileSaver.min_20170301.js"></script>
     <script src="generic_tools.js"></script>
     <script src="popup.js"></script>
   </head>
@@ -99,5 +100,6 @@
     <div class='row_cell_right'><button class="btnPhoto" id="btnOpenNextPhoto" type="button" disabled></button></div>
     <div class='row_cell_right'><button class="btnPhoto" id="btnOpenPrevPhoto" type="button" disabled></button></div>
     <div class='row_cell_right'><button class="btnPhoto" id="btnOpenPhotos" type="button" disabled></button></div>
+    <div class='row_cell_right'><button class="btnSaveAs" id="btnSaveAs" type="button" disabled></button></div>
   </body>
 </html>
