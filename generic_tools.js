@@ -10,6 +10,8 @@ function formatMsg(format, datetime, username, text){
   var msg = format;
   var mapObj = {
     dt:datetime,
+    d:datetime.substring(0,10),
+    t:datetime.substring(11,19),
     u:username,
     m:text,
   };
@@ -36,6 +38,7 @@ function prepareFormat(format) {
 function formatDate(d){
   return lead(d.getDate())+'.'+lead(d.getMonth()+1)+'.'+d.getFullYear() + ' ' 
     + lead(d.getHours()) + ':' + lead(d.getMinutes()) + ':' + lead(d.getSeconds());
+  //Example of output   31.12.2016 23:59:59
 }
 
 function formatDateForFileName(d){
