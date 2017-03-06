@@ -25,13 +25,15 @@ function clear(){
 	console.log('cleared')
 }
 
-function storeMessage(messageDate, messageSender, messageTxt, messageMetaInfo, hiddenInfo){
+function storeMessage(messageDate, messageSender, messageTxt, messageMetaInfo, hiddenInfo, fwdMessageDate, fwdSender){
 	historyMessages.push({
 		date: messageDate,
 		sender: messageSender,
 		text: messageTxt,
 		metainfo: messageMetaInfo, // to display
 		hiddeninfo: hiddenInfo, // e.g. {mes_id:"", photo_id:""}
+		fwd_date: fwdMessageDate,
+		fwd_sender: fwdSender,
 	})
 }
 
@@ -57,6 +59,12 @@ function getPhotosData(AppPhotMng, userID){
 }
 
 
+function getUserFullName(userID,AppUsrMng){
+	var userObject = AppUsrMng.getUser(userID)
+	var fName = userObject.rFullName.toString()
+	return fName
+}
+
 function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,time1){
 	if (res.$$state.status == 1){
 		if (historyForPeerID != peerID){
@@ -73,14 +81,21 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,tim
 		for(var i=0; i<messageIDs.length; i++){ //what order? date decreasing?
 			var msgWrap = AppMesMng.wrapForHistory(messageIDs[i])
 			var msgTxt = msgWrap.message
-			var msgDate = formatDate(new Date(msgWrap.date * 1000))
+			var msgDate = formatDate(new Date(msgWrap.date * 1000)) // we format here to avoid multiple formatting at popup.js
 			var msgSender = msgWrap.fromID // ID
 			var msgMetaInfo = ''
 			var msgHiddenInfo = {msg_id: messageIDs[i]}
+			var fwdMessageDate = ''
+			var fwdSender = ''			
 			if (!(msgSender in peerIDs)){
-				var userObject = AppUsrMng.getUser(msgSender)
-				var fName = userObject.rFullName.toString()
-				peerIDs[msgSender] = fName
+				peerIDs[msgSender] = getUserFullName(msgSender,AppUsrMng)
+			}
+			if (msgWrap.fwd_from){
+				fwdMessageDate = formatDate(new Date(msgWrap.fwd_from.date * 1000))
+				fwdSender = msgWrap.fwd_from.from_id
+				if (!(fwdSender in peerIDs)){
+					peerIDs[fwdSender] = getUserFullName(fwdSender,AppUsrMng)
+				}
 			}
 			if (msgWrap.media){
 				console.log('found media type of the message, date = '+msgDate)
@@ -157,7 +172,7 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,tim
 						console.log('found unknown type of media: '+msgWrap.media._)
 				}
 			}
-			storeMessage(msgDate,msgSender,msgTxt,msgMetaInfo,msgHiddenInfo)
+			storeMessage(msgDate,msgSender,msgTxt,msgMetaInfo,msgHiddenInfo,fwdMessageDate,fwdSender)
 		}
 		maxID = messageIDs[messageIDs.length-1]
 		console.log("fetched "+messageIDs.length+" messages in "

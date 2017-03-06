@@ -60,6 +60,15 @@ function friendlySize(size){
 }
 
 
+function appendWithSpace(input_string, new_part){
+  if (new_part.length == 0)
+    return input_string
+  if (input_string.length > 0)
+    return input_string + ' ' + new_part
+  return input_string + new_part
+}
+
+
 function comparatorArithmetic(a,b){
   return a-b
 }
@@ -86,3 +95,5 @@ function binSearch(arr, val, comparator) {
   } 
   return -right
 }
+
+

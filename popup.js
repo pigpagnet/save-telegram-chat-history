@@ -45,11 +45,19 @@ function displayMessages(msg){
     if (senderID == msg.detail.myID){
       author += "(you)";
     }
+    var fwd_senderID = msgWrap.fwd_sender
+
+    var metainfoFwd = ''
+    if (fwd_senderID != ''){
+      var fwd_sender = msg.detail.peerIDs[fwd_senderID]
+      var fwd_dateTimeFormatted = msgWrap.fwd_date
+      metainfoFwd =  '{{FWD: ' + fwd_sender +', '+fwd_dateTimeFormatted+'}}'
+    }
     var text = msgWrap.text
     var metainfo = msgWrap.metainfo
     if (metainfo.length > 0)
       metainfo = '[[' + metainfo + ']]'
-    var msgFormatted = formatMsg(currentFormat,curDateTimeFormatted,author, metainfo + text)
+    var msgFormatted = formatMsg(currentFormat,curDateTimeFormatted,author, metainfoFwd +'\n'+ metainfo + text)
     textArea += "\n" + msgFormatted
     linesAfterMessages.push(linesAfterMessages[linesAfterMessages.length-1] + getLineNumberFromString(msgFormatted))
     //receivedMsg.push($.extend(messages[i].hiddeninfo))
