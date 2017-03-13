@@ -43,7 +43,7 @@
         border-collapse: collapse;
         border-spacing: 0;
       }
-      .btnPhoto .btnSaveAs{
+      .btnPhoto .btnSaveAs .btnIcon{
         min-width: 52px;
         max-width: 52px;
         min-height: 50px;
@@ -97,9 +97,19 @@
     <table class='tableGrid row_cell row_cell_heigth '>
       <tr><td><div id='progressBar' class='row_cell btnLoadGrid' readonly></div></td></tr>
     </table>
-    <div class='row_cell_right'><button class="btnPhoto" id="btnOpenNextPhoto" type="button" disabled></button></div>
-    <div class='row_cell_right'><button class="btnPhoto" id="btnOpenPrevPhoto" type="button" disabled></button></div>
-    <div class='row_cell_right'><button class="btnPhoto" id="btnOpenPhotos" type="button" disabled></button></div>
-    <div class='row_cell_right'><button class="btnSaveAs" id="btnSaveAs" type="button" disabled></button></div>
+   
+    <table>
+      <tr>
+        <td><div>Cursor photo</div></td>
+        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenPrevPhoto" type="button" disabled></button></div></td>
+        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenNextPhoto" type="button" disabled></button></div></td>
+      </tr>
+      <tr>
+        
+        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenPhotos" type="button" disabled></button></div></td>
+        <td><div class='row_cell'><button class="btnSaveAs" id="btnSaveAs" type="button" disabled></button></div></td>
+        <td><div class='row_cell'><button class="btnIcon" id="btnClose" type="button" disabled>Close</button></div></td>
+      </tr>
+    </table>
   </body>
 </html>

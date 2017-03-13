@@ -23,11 +23,18 @@ function getLineNumberFromString(str){
 var ReceivedMsg
 var LinesAfterMessages
 
+var PeerID
 var NamePeer
 
 function displayMessages(msg){
-  var textArea = "Your Telegram History\n"
+  PeerID = msg.detail.peerID
   NamePeer = msg.detail.peerIDs[msg.detail.peerID]
+  var textArea = 'Your Telegram History'
+  if (PeerID >=0){
+    textArea += ' with ' + NamePeer + '\n'
+  }else{
+    textArea += ' in "' + NamePeer + '"\n'
+  }
   var messages = msg.detail.historyMessages
   var countMessages = msg.detail.countMessages
   var firstDate = messages[messages.length-1].date
@@ -46,18 +53,23 @@ function displayMessages(msg){
       author += "(you)";
     }
     var fwd_senderID = msgWrap.fwd_sender
+    //console.log('fwd_senderID = ' + fwd_senderID)
 
     var metainfoFwd = ''
-    if (fwd_senderID != ''){
+    if (fwd_senderID && fwd_senderID != ''){
       var fwd_sender = msg.detail.peerIDs[fwd_senderID]
       var fwd_dateTimeFormatted = msgWrap.fwd_date
-      metainfoFwd =  '{{FWD: ' + fwd_sender +', '+fwd_dateTimeFormatted+'}}'
+      metainfoFwd =  '{{FWD: ' + fwd_sender +', '+fwd_dateTimeFormatted+'}}\n'
     }
-    var text = msgWrap.text
-    var metainfo = msgWrap.metainfo
-    if (metainfo.length > 0)
+    var text = msgWrap.text || ''
+    var metainfo = msgWrap.metainfo || ''
+    if (metainfo && metainfo.length > 0)
       metainfo = '[[' + metainfo + ']]'
-    var msgFormatted = formatMsg(currentFormat,curDateTimeFormatted,author, metainfoFwd +'\n'+ metainfo + text)
+    var msgFormatted = ''
+    if (msgWrap.type == 'service'){
+      msgFormatted += '.....'
+    }
+    msgFormatted += formatMsg(currentFormat,curDateTimeFormatted,author, metainfoFwd + metainfo + text)
     textArea += "\n" + msgFormatted
     linesAfterMessages.push(linesAfterMessages[linesAfterMessages.length-1] + getLineNumberFromString(msgFormatted))
     //receivedMsg.push($.extend(messages[i].hiddeninfo))
@@ -121,6 +133,7 @@ function enableButtons(enable){
   if (enable){
     isShowProgress = false
   }
+  $('#btnClose').attr('disabled', false)
 }
 
 //--------------ProgressBar part
@@ -175,7 +188,8 @@ function checkConnection(){
         //TODO undefined! do smth useful!
         connectionOK = false
         console.log('no response from the main tab.');
-        $('#myTextarea').val("To save your telegram chat history, you first need to visit https://web.telegram.org, login, and select one of your contacts.");
+        $('#myTextarea').val("To save your telegram chat history, you first need to visit https://web.telegram.org, login, and select one of your contacts."
+          + " If you did it already and still see this message, try to reload the web-page.");
       }
     });
   });
@@ -202,10 +216,10 @@ function renderCountPhotos(cntPhotos){
   but.innerHTML = 'Open photos'
   var but2 = document.getElementById('btnOpenPrevPhoto')
   but2.disabled = cntPhotos == 0
-  but2.innerHTML = 'Cursor prev photo'
+  but2.innerHTML = 'prev'
   var but3 = document.getElementById('btnOpenNextPhoto')
   but3.disabled = cntPhotos == 0
-  but3.innerHTML = 'Cursor next photo'
+  but3.innerHTML = 'next'
 }
 
 function renderSaveAs(){
@@ -264,6 +278,11 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     checkConnection()
 
+    $('#btnClose').click(function (){
+      var daddy = window.self;
+      daddy.opener = window.self;
+      daddy.close();
+    })
     $('#btnOpenPhotos').click(function (){
       communicate('stch_open_photos')
     })
@@ -278,7 +297,12 @@ document.addEventListener('DOMContentLoaded', function() {
       var text = $('#myTextarea').val()
       var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
       var dateSave = formatDateForFileName(new Date)
-      saveAs(blob, "telegram_chat_history__"+NamePeer+"__"+dateSave+".txt");
+      if (PeerID >=0){
+        saveAs(blob, "telegram_chat_history__"+NamePeer+"__"+dateSave+".txt");
+      }else{
+        saveAs(blob, "telegram_group_history__"+NamePeer+"__"+dateSave+".txt");
+      }
+      
     })
 
     $('#myTextarea').keyup(function(){

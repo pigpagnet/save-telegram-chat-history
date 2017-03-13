@@ -27,6 +27,7 @@ function clear(){
 
 function storeMessage(messageDate, messageSender, messageTxt, messageMetaInfo, hiddenInfo, fwdMessageDate, fwdSender){
 	historyMessages.push({
+		type: 'msg',
 		date: messageDate,
 		sender: messageSender,
 		text: messageTxt,
@@ -34,6 +35,16 @@ function storeMessage(messageDate, messageSender, messageTxt, messageMetaInfo, h
 		hiddeninfo: hiddenInfo, // e.g. {mes_id:"", photo_id:""}
 		fwd_date: fwdMessageDate,
 		fwd_sender: fwdSender,
+	})
+}
+
+function storeServiceMessage(messageDate, messageSender, messageText, hiddenInfo){
+	historyMessages.push({
+		type: 'service',
+		date: messageDate,
+		sender: messageSender,
+		text: messageText,
+		hiddeninfo: hiddenInfo, // e.g. {mes_id:"", ?photo_id:""}
 	})
 }
 
@@ -45,7 +56,7 @@ function sendHistory(){
 			historyMessages: historyMessages,
 			peerIDs: peerIDs,
 			countMessages: countMessages,
-			countPhotos: photosData && photosData.count ? photosData.count : 0
+			countPhotos: photosData && photosData.count ? photosData.count : 0,
 		}
 	}))
 }
@@ -58,19 +69,31 @@ function getPhotosData(AppPhotMng, userID){
 	// {count, photos: photoIDs}
 }
 
-
-function getUserFullName(userID,AppUsrMng){
-	var userObject = AppUsrMng.getUser(userID)
-	var fName = userObject.rFullName.toString()
-	return fName
+function updateCache_PeerFullName(userID,AppUsrMng){
+	if (!(userID in peerIDs)){
+		var userObject = AppUsrMng.getUser(userID)
+		peerIDs[userID] = userObject.rFullName.toString()
+	}
 }
 
-function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,time1){
+function updateCache_PeerGroupTitle(peerID,AppChatsMng){
+	if (!(peerID in peerIDs)){
+		var groupObject = AppChatsMng.getChat(-peerID)
+		peerIDs[peerID] = groupObject.title
+	}
+}
+
+function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,AppPhotMng,time1){
 	if (res.$$state.status == 1){
 		if (historyForPeerID != peerID){
 			clear()
 			historyForPeerID = peerID
-			getPhotosData(AppPhotMng, historyForPeerID)
+			if (historyForPeerID >= 0){
+				getPhotosData(AppPhotMng, historyForPeerID)
+				updateCache_PeerFullName(historyForPeerID,AppUsrMng)
+			} else { //it is a group
+				updateCache_PeerGroupTitle(historyForPeerID,AppChatsMng)
+			}
 		}
 		if (countMessages == -1){
 			countMessages = res.$$state.value.count
@@ -80,22 +103,63 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,tim
 		var time2 = new Date().getTime()
 		for(var i=0; i<messageIDs.length; i++){ //what order? date decreasing?
 			var msgWrap = AppMesMng.wrapForHistory(messageIDs[i])
-			var msgTxt = msgWrap.message
+			var msgHiddenInfo = {msg_id: messageIDs[i]}
 			var msgDate = formatDate(new Date(msgWrap.date * 1000)) // we format here to avoid multiple formatting at popup.js
 			var msgSender = msgWrap.fromID // ID
-			var msgMetaInfo = ''
-			var msgHiddenInfo = {msg_id: messageIDs[i]}
-			var fwdMessageDate = ''
-			var fwdSender = ''			
-			if (!(msgSender in peerIDs)){
-				peerIDs[msgSender] = getUserFullName(msgSender,AppUsrMng)
+			updateCache_PeerFullName(msgSender,AppUsrMng)
+			if (msgWrap._ == 'messageService'){
+				var msgServiceText = ''
+				switch (msgWrap.action._){
+					case 'messageActionChatCreate': 
+						msgServiceText = 'created the group "' + (msgWrap.action.title || '' ) + '"'
+						break
+					case 'messageActionChannelMigrateFrom':
+						msgServiceText = 'upgraded the group to a supergroup'
+						break
+					case 'messageActionChatAddUser': //invited {users.name....}
+						msgServiceText = 'invited '
+						for(var iuser=0; iuser<msgWrap.action.users.length; iuser++){
+							var invited_uid = msgWrap.action.users[iuser]
+							updateCache_PeerFullName(invited_uid,AppUsrMng)
+							if (iuser == 0)
+								msgServiceText += peerIDs[invited_uid]
+							else
+								msgServiceText += ', ' + peerIDs[invited_uid]
+						}
+						break
+					case 'messageActionChatLeave':
+						//if (msgWrap.action.user_id == msgSender){ //left group
+						msgServiceText = 'left group'
+						break
+					case 'messageActionChatDeleteUser': //removed {users.name....}
+						var removed_uid = msgWrap.action.user_id
+						updateCache_PeerFullName(removed_uid,AppUsrMng)
+						msgServiceText = 'removed ' + peerIDs[removed_uid]
+						break
+					case 'messageActionChatEditTitle': 
+						msgServiceText = 'changed group name to "' + (msgWrap.action.title || '' ) +'"'
+						break
+					case 'messageActionChatEditPhoto':
+						msgServiceText = 'changed group photo'
+						break
+					case 'messageActionChatDeletePhoto':
+						msgServiceText = 'removed group photo'
+						break
+					default:
+						msgServiceText = 'unsupported service message type: ' + msgWrap.action._
+				}
+				storeServiceMessage(msgDate,msgSender,'>>' + msgServiceText + '<<',msgHiddenInfo)
+				continue
 			}
+
+			var msgTxt = msgWrap.message
+			var msgMetaInfo = ''
+			var fwdMessageDate = ''
+			var fwdSender = ''
 			if (msgWrap.fwd_from){
 				fwdMessageDate = formatDate(new Date(msgWrap.fwd_from.date * 1000))
 				fwdSender = msgWrap.fwd_from.from_id
-				if (!(fwdSender in peerIDs)){
-					peerIDs[fwdSender] = getUserFullName(fwdSender,AppUsrMng)
-				}
+				updateCache_PeerFullName(fwdSender,AppUsrMng)
 			}
 			if (msgWrap.media){
 				console.log('found media type of the message, date = '+msgDate)
@@ -184,7 +248,7 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppPhotMng,tim
 	}else{
 		setTimeout(function(){
 			processGetHistoryResponse(peerID,res,
-				AppMesMng,AppUsrMng,AppPhotMng,time1)
+				AppMesMng,AppUsrMng,AppChatsMng,AppPhotMng,time1)
 		},timeOutWaitForHistory);
 	}
 }
@@ -193,6 +257,7 @@ function handleMoreHistoryRequest(limit){
 	var injector = angular.element(document).injector()
 	var AppMesManager = injector.get('AppMessagesManager')
 	var AppUsrManager = injector.get('AppUsersManager')
+	var AppChatsManager = injector.get('AppChatsManager')
 	var AppPhotManager = injector.get('AppPhotosManager')
 	var iRootScope = injector.get('$rootScope')
 	var peerID = iRootScope.selectedPeerID
@@ -202,7 +267,7 @@ function handleMoreHistoryRequest(limit){
 	if (countMessages==-1 || historyMessages.length < countMessages){
 		var res = AppMesManager.getHistory(peerID, maxID, limit)
 		processGetHistoryResponse(peerID,res,
-			AppMesManager,AppUsrManager,AppPhotManager,time1)
+			AppMesManager,AppUsrManager,AppChatsManager,AppPhotManager,time1)
 	}else{
 		sendHistory()
 	}
