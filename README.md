@@ -9,13 +9,12 @@ Perhaps, many of us use and like Telegram messenger for conversations with frien
 - Visit https://web.telegram.org.
 - Select a peer you want to get history from.
 - Click on the icon "Save Telegram Chat History".
-- In the popup window click one of the buttons to fetch some messages, then select all text (Ctrl+A) and copy it (Ctrl+C).
-- Paste the text into a text editor (Ctrl+V) and save to a local file.
+- In the popup window click one of the buttons to fetch some messages, then 'Save As' to a local file.
 - Congratulations! You are done.
 
 
 ###Features
-* Shows your chat history with a Telegram peer as text.
+* Shows your chat history with a Telegram peer or a group as text.
 * Works even for DELETED accounts.
 * Browse photos depending on the cursor position or as a list, with possibility to save one by one (since 2.1.0).
 * Fetching history without scrolling (since 2.0.0).

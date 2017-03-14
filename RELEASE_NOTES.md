@@ -1,4 +1,8 @@
 ###Release Notes
+
+February 2017 --- Version 2.1.1
+* Fixed the options page
+
 February 13, 2017 --- Version 2.1.0
 * Opens a list of all photos with possibility to navigate
 * Opens previous or next photo based on cursor in the chat log
@@ -30,3 +34,4 @@ June 16, 2016 --- Version 1.1.0
  
 February 7, 2016 --- Version 1.0.0
  * Initial release
+ 
