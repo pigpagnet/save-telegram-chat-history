@@ -1,3 +1,9 @@
+defaultTextHint = "To save your telegram chat history, you first need to:\n"
+  +" - visit https://web.telegram.org, login, and\n"
+  +" - select one of your contacts.\n\n"
+  +"If you did it already and still see this message, try to reload the web-page."
+
+
 // User settings variables
 currentFormat = null;
 
@@ -28,6 +34,12 @@ var NamePeer
 
 function displayMessages(msg){
   PeerID = msg.detail.peerID
+  if (PeerID == 0){
+    $('#myTextarea').val(defaultTextHint)
+    enableButtons(false)
+    isShowProgress = false
+    return
+  }
   NamePeer = msg.detail.peerIDs[msg.detail.peerID]
   var textArea = 'Your Telegram History'
   if (PeerID >=0){
@@ -83,7 +95,7 @@ function displayMessages(msg){
     restoreTextareaScroll('#myTextarea')
   }
   renderCountPhotos(msg.detail.countPhotos)
-  renderSaveAs()
+  renderSaveAs(true)
   //Update status
   var elapsedTime = new Date()-last_request_time
   var logMsg = ' History from ' + firstDate+"."
@@ -96,6 +108,7 @@ function displayMessages(msg){
   $('#txtAreaStatus').val(logMsg)
   ReceivedMsg = receivedMsg
   LinesAfterMessages = linesAfterMessages
+  enableButtons(true)
 }
 
 function communicate(commandText, value){
@@ -176,6 +189,8 @@ function stopProgress(){
 //--------------- end of ProgressBar part
 
 function checkConnection(){
+  renderCountPhotos(0)
+  renderSaveAs(false)
   console.log("Checking connection with main page.")
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, {text: 'stch_check_conn'}, function(response){
@@ -188,8 +203,8 @@ function checkConnection(){
         //TODO undefined! do smth useful!
         connectionOK = false
         console.log('no response from the main tab.');
-        $('#myTextarea').val("To save your telegram chat history, you first need to visit https://web.telegram.org, login, and select one of your contacts."
-          + " If you did it already and still see this message, try to reload the web-page.");
+        $('#myTextarea').val(defaultTextHint);
+        enableButtons(false)
       }
     });
   });
@@ -198,7 +213,6 @@ function checkConnection(){
 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
   chrome.runtime.onMessage.addListener(function(msg) {
     displayMessages(msg)
-    enableButtons(true)
   })
 })
 
@@ -222,9 +236,9 @@ function renderCountPhotos(cntPhotos){
   but3.innerHTML = 'next'
 }
 
-function renderSaveAs(){
+function renderSaveAs(enable){
   var but = document.getElementById("btnSaveAs")
-  but.disabled = isShowProgress
+  but.disabled = !enable //isShowProgress
   but.innerHTML = 'Save As Text'
 }
 

@@ -261,6 +261,12 @@ function handleMoreHistoryRequest(limit){
 	var AppPhotManager = injector.get('AppPhotosManager')
 	var iRootScope = injector.get('$rootScope')
 	var peerID = iRootScope.selectedPeerID
+
+	if (peerID == 0){
+		console.log('it seems a peer was not chosen.')
+		sendHistory()
+		return
+	}
 	console.log("loading history for peerID = " + peerID)
 	var time1 = new Date().getTime()
 
