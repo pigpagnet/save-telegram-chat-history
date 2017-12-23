@@ -83,6 +83,24 @@ function updateCache_PeerGroupTitle(peerID,AppChatsMng){
 	}
 }
 
+function fancyTimeFormat(time) {
+	// Hours, minutes and seconds
+	var hrs = ~~(time / 3600);
+	var mins = ~~((time % 3600) / 60);
+	var secs = time % 60;
+	
+	// Output like "1:01" or "4:03:59" or "123:03:59"
+	var ret = "";
+	
+	if (hrs > 0) {
+		ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+	}
+	
+	ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+	ret += "" + secs;
+	return ret;
+}
+
 function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,AppPhotMng,time1){
 	if (res.$$state.status == 1){
 		if (historyForPeerID != peerID){
@@ -105,7 +123,7 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 			var msgWrap = AppMesMng.wrapForHistory(messageIDs[i])
 			var msgHiddenInfo = {msg_id: messageIDs[i]}
 			var msgDate = formatDate(new Date(msgWrap.date * 1000)) // we format here to avoid multiple formatting at popup.js
-			var msgSender = msgWrap.fromID // ID
+			var msgSender = msgWrap.from_id // ID
 			updateCache_PeerFullName(msgSender,AppUsrMng)
 			if (msgWrap._ == 'messageService'){
 				var msgServiceText = ''
@@ -144,6 +162,24 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 						break
 					case 'messageActionChatDeletePhoto':
 						msgServiceText = 'removed group photo'
+						break
+					case 'messageActionPhoneCall':
+						switch (msgWrap.action.type) {
+							case 'in_missed':
+								msgServiceText = 'missed call'
+								break
+							case 'in_ok':
+								msgServiceText = 'incoming call ' + fancyTimeFormat(msgWrap.action.duration)
+								break
+							case 'out_missed':
+								msgServiceText = 'cancelled call'
+								break
+							case 'out_ok':
+								msgServiceText = 'outgoing call ' + fancyTimeFormat(msgWrap.action.duration)
+								break
+							default:
+								msgServiceText = 'unknown information about call'
+						}
 						break
 					default:
 						msgServiceText = 'unsupported service message type: ' + msgWrap.action._
