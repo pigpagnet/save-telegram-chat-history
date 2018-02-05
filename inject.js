@@ -72,7 +72,11 @@ function getPhotosData(AppPhotMng, userID){
 function updateCache_PeerFullName(userID,AppUsrMng){
 	if (!(userID in peerIDs)){
 		var userObject = AppUsrMng.getUser(userID)
-		peerIDs[userID] = userObject.rFullName.toString()
+		if (userObject.deleted){
+			peerIDs[userID] = 'DELETED'
+		}else{
+			peerIDs[userID] = userObject.rFullName.toString()
+		}
 	}
 }
 
