@@ -1,6 +1,15 @@
 ###Release Notes
 
-February 2017 --- Version 2.1.1
+February 5, 2018 --- Version 2.2.2
+* Fixed bug when a chat contains phone calls
+
+March 23, 2017 --- Version 2.2.1
+???
+
+March 14, 2017 --- Version 2.2.0
+???
+
+February 23, 2017 --- Version 2.1.1
 * Fixed the options page
 
 February 13, 2017 --- Version 2.1.0

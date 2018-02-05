@@ -61,12 +61,17 @@ function friendlySize(size){
   return res
 }
 
-function formatCallDuration(secs_all){
-  var min = Math.floor(secs_all/60);
-  var secs = secs_all % 60;
-  return '' + min + ':' + lead(secs)
+function formatCallDuration(time){
+  var hrs = ~~(time / 3600);
+  var mins = ~~((time % 3600) / 60);
+  var secs = time % 60;
+  // Output like "1:01" or "4:03:59" or "123:03:59"
+  if (hrs > 0){
+    return '' + hrs + ':' + lead(min) + ':' + lead(secs)
+  }else{
+    return '' + min + ':' + lead(secs)
+  }
 }
-
 
 function appendWithSpace(input_string, new_part){
   if (new_part.length == 0)
