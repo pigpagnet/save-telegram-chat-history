@@ -105,11 +105,7 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 			var msgWrap = AppMesMng.wrapForHistory(messageIDs[i])
 			var msgHiddenInfo = {msg_id: messageIDs[i]}
 			var msgDate = formatDate(new Date(msgWrap.date * 1000)) // we format here to avoid multiple formatting at popup.js
-<<<<<<< HEAD
 			var msgSender = msgWrap.fromID || msgWrap.from_id // ID
-=======
-			var msgSender = msgWrap.from_id // ID
->>>>>>> 3b75ccb69f0ceba3c13099c9c5c0e8598ea47713
 			updateCache_PeerFullName(msgSender,AppUsrMng)
 			if (msgWrap._ == 'messageService'){
 				var msgServiceText = ''
@@ -152,16 +148,16 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 					case 'messageActionPhoneCall':
 						switch (msgWrap.action.type){
 							case 'in_ok':
-								msgServiceText = 'Incoming Call ' + formatCallDuration(msgWrap.action.duration)
+								msgServiceText = 'incoming call ' + formatCallDuration(msgWrap.action.duration)
 								break
 							case 'out_ok':
-								msgServiceText = 'Outgoing Call ' + formatCallDuration(msgWrap.action.duration)
+								msgServiceText = 'outgoing call ' + formatCallDuration(msgWrap.action.duration)
 								break
 							case 'in_missed':
-								msgServiceText = 'Missed Call'
+								msgServiceText = 'missed call'
 								break
 							case 'out_missed':
-								msgServiceText = 'Cancelled Call'
+								msgServiceText = 'cancelled call'
 								break
 							default:
 								msgServiceText = 'unknown phone call action type: ' + msgWrap.action.type
