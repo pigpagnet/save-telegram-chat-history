@@ -117,6 +117,9 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 					case 'messageActionChatCreate': 
 						msgServiceText = 'created the group "' + (msgWrap.action.title || '' ) + '"'
 						break
+					case 'messageActionChannelCreate':
+						msgServiceText = 'created the channel "' + (msgWrap.action.title || '' ) + '"'
+						break
 					case 'messageActionChannelMigrateFrom':
 						msgServiceText = 'upgraded the group to a supergroup'
 						break
@@ -145,6 +148,9 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 						break
 					case 'messageActionChatEditPhoto':
 						msgServiceText = 'changed group photo'
+						break
+					case 'messageActionChannelEditPhoto':
+						msgServiceText = 'changed channel photo'
 						break
 					case 'messageActionChatDeletePhoto':
 						msgServiceText = 'removed group photo'
