@@ -30,7 +30,6 @@ function prepareFormat(format) {
 
 
 
-
 // Argument is of type Date.
 // Some examples:
 //   d = new Date();  // current date
@@ -60,6 +59,12 @@ function friendlySize(size){
     res = res.slice(0,i) + "'" + res.slice(i)
   }
   return res
+}
+
+function formatCallDuration(secs_all){
+  var min = Math.floor(secs_all/60);
+  var secs = secs_all % 60;
+  return '' + min + ':' + lead(secs)
 }
 
 

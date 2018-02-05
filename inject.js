@@ -105,7 +105,7 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 			var msgWrap = AppMesMng.wrapForHistory(messageIDs[i])
 			var msgHiddenInfo = {msg_id: messageIDs[i]}
 			var msgDate = formatDate(new Date(msgWrap.date * 1000)) // we format here to avoid multiple formatting at popup.js
-			var msgSender = msgWrap.fromID // ID
+			var msgSender = msgWrap.fromID || msgWrap.from_id // ID
 			updateCache_PeerFullName(msgSender,AppUsrMng)
 			if (msgWrap._ == 'messageService'){
 				var msgServiceText = ''
@@ -144,6 +144,24 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 						break
 					case 'messageActionChatDeletePhoto':
 						msgServiceText = 'removed group photo'
+						break
+					case 'messageActionPhoneCall':
+						switch (msgWrap.action.type){
+							case 'in_ok':
+								msgServiceText = 'Incoming Call ' + formatCallDuration(msgWrap.action.duration)
+								break
+							case 'out_ok':
+								msgServiceText = 'Outgoing Call ' + formatCallDuration(msgWrap.action.duration)
+								break
+							case 'in_missed':
+								msgServiceText = 'Missed Call'
+								break
+							case 'out_missed':
+								msgServiceText = 'Cancelled Call'
+								break
+							default:
+								msgServiceText = 'unknown phone call action type: ' + msgWrap.action.type
+						}
 						break
 					default:
 						msgServiceText = 'unsupported service message type: ' + msgWrap.action._
