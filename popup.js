@@ -90,6 +90,7 @@ function displayMessages(msg){
   linesAfterMessages.reverse()
   receivedMsg.reverse()
   $('#myTextarea').html(textArea).text()
+  //$('#myTextarea').val(textArea)
   if (first_request){
     first_request = false
     restoreTextareaScroll('#myTextarea')
@@ -153,18 +154,24 @@ function enableButtons(enable){
 
 var isShowProgress = false
 
+function precision_one_digit(t){
+  return Math.floor(t*10) / 10
+}
+
 function showProgress(){
   // last_request_time
   var t = new Date().getTime()
-  var elapsed_sec = Math.floor((t - last_request_time) / 100) / 10
-  var elapsed_min = Math.floor(elapsed_sec / 60)
-  var str = "" + elapsed_sec 
+  var elapsed_sec = precision_one_digit((t - last_request_time) / 1000)
+  //var elapsed_sec = Math.floor((t - last_request_time) / 100) / 10
+  var min = Math.floor(elapsed_sec / 60)
+  var sec = precision_one_digit(elapsed_sec - min * 60)
+  var str = "" + sec 
   if (str.length<2 || str.charAt(str.length-2)!='.'){
     str += '.0'
   }
   str += "s"
-  if (elapsed_min > 0){
-    str = elapsed_min + 'm ' + str
+  if (min > 0){
+    str = min + 'm ' + str
   }
   if (elapsed_sec > 0.99){
     $('#progressBar').text(str)

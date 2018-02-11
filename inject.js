@@ -75,15 +75,18 @@ function updateCache_PeerFullName(userID,AppUsrMng){
 		if (userObject.deleted){
 			peerIDs[userID] = 'DELETED'
 		}else{
-			peerIDs[userID] = userObject.rFullName.toString()
+			//peerIDs[userID] = userObject.rFullName.toString()
+			peerIDs[userID] = userObject.rFullName.toString() 
+				+ (userObject.username? " [@" + userObject.username + "]" : "")
 		}
 	}
 }
 
 function updateCache_PeerGroupTitle(peerID,AppChatsMng){
 	if (!(peerID in peerIDs)){
-		var groupObject = AppChatsMng.getChat(-peerID)
+		var groupObject = AppChatsMng.getChat(peerID)
 		peerIDs[peerID] = groupObject.title
+		//'_' = 'channel'
 	}
 }
 
@@ -134,9 +137,12 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 								msgServiceText += ', ' + peerIDs[invited_uid]
 						}
 						break
+					case 'messageActionChatJoined':
+						msgServiceText = 'joined the group'
+						break
 					case 'messageActionChatLeave':
 						//if (msgWrap.action.user_id == msgSender){ //left group
-						msgServiceText = 'left group'
+						msgServiceText = 'left the group'
 						break
 					case 'messageActionChatDeleteUser': //removed {users.name....}
 						var removed_uid = msgWrap.action.user_id
