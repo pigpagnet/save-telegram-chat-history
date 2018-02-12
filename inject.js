@@ -75,10 +75,6 @@ function updateCache_PeerFullName(userID,AppUsrMng){
 		if (userObject.pFlags.deleted){
 			peerIDs[userID] = 'DELETED'
 		}else{
-			//peerIDs[userID] = userObject.rFullName.toString()
-			if (!userObject.first_name){
-				var t = 1
-			}
 			peerIDs[userID] = userObject.first_name
 				+ (userObject.last_name? " " + userObject.last_name : "")
 				+ (userObject.username? " [@" + userObject.username + "]" : "")
@@ -89,7 +85,8 @@ function updateCache_PeerFullName(userID,AppUsrMng){
 function updateCache_PeerGroupTitle(peerID,AppChatsMng){
 	if (!(peerID in peerIDs)){
 		var groupObject = AppChatsMng.getChat(-peerID)
-		peerIDs[peerID] = groupObject.title
+		peerIDs[peerID] = groupObject.title 
+			+ (groupObject.username? " [@" + groupObject.username + "]" : "")
 		//'_' = 'channel'
 	}
 }
