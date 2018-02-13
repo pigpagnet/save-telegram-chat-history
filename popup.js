@@ -1,7 +1,17 @@
-defaultTextHint = "To save your telegram chat history, you first need to:\n"
-  +" - visit https://web.telegram.org, login, and\n"
-  +" - select one of your contacts.\n\n"
+const NL = '\r\n'
+
+defaultTextHint = "To save your telegram chat history, you first need to:" + NL
+  +" - visit https://web.telegram.org, login, and" + NL
+  +" - select one of your contacts." + NL + NL
   +"If you did it already and still see this message, try to reload the web-page."
+
+
+defaultTextWait = "Please wait until messages are downloaded." + NL
+  +"You may safely close the extension and come back later." + NL 
+  +"Alternatively, you can reload the web-page (e.g., by pressing F5)." + NL + NL
+  +"There might be a blue indicator with text '!' displayed next to the extension icon." + NL 
+  +"  blue indicator = messages are being downloaded" + NL
+  +"  normal icon    = messages have been downloaded and are being rendered into *this* window" + NL
 
 
 // User settings variables
@@ -13,17 +23,15 @@ connectionOK = false
 keep_scrolling = false
 
 min_time_between_requests = 2000
-var last_request_time = new Date()
+
+function last_request_time(){
+  return chrome.extension.getBackgroundPage().last_request_time
+}
 
 myTextAreaLineNumber = -1
 
-function getLineNumber(textarea) {
-  //word wrap is not counted as new line.
-  return textarea.value.substr(0, textarea.selectionStart).split("\n").length
-}
-
 function getLineNumberFromString(str){
-  return str.split("\n").length
+  return str.split(NL).length
 }
 
 var ReceivedMsg
@@ -31,47 +39,84 @@ var LinesAfterMessages
 
 var PeerID
 var NamePeer
+var CntPhotos
 
-function displayMessages(msg){
-  PeerID = msg.detail.peerID
+var editor
+
+function initAce(){
+  editor= ace.edit("myTextarea")
+  //editor.setTheme("ace/theme/chrome")
+  //editor.session.setMode("ace/mode/javascript")
+  //editor.$blockScrolling = Infinity
+  editor.setOptions({
+    newLineMode: 'auto', // 'unix', 'windows', 'auto'
+    readOnly: 'true',
+    vScrollBarAlwaysVisible: 'false',
+  })
+  editor.getSession().setUseWrapMode(true)
+}
+
+function getAceLineNumber(){
+  //FIXME hardcoded only 1 editor
+  var pos = editor.getCursorPosition()
+  return pos.row
+}
+
+function restoreAceState(){
+  var scrollTop = chrome.extension.getBackgroundPage().aceTopScroll
+  var curRow = chrome.extension.getBackgroundPage().aceCurRow
+  editor.selection.moveTo(curRow, 0)
+  editor.getSession().setScrollTop(scrollTop || 0)
+}
+
+function storeAceState(){
+  scrollTop = editor.renderer.getScrollTop()
+  aceCurRow = getAceLineNumber()
+  if (scrollTop < 0)
+    return
+  chrome.extension.getBackgroundPage().aceCurRow = aceCurRow
+  chrome.extension.getBackgroundPage().aceTopScroll = scrollTop
+}
+
+function displayMessages(msgWrap){
+  var msg = msgWrap.detail
+  PeerID = msg.peerID
   if (PeerID == 0){
     $('#myTextarea').val(defaultTextHint)
     enableButtons(false)
     isShowProgress = false
     return
   }
-  NamePeer = msg.detail.peerIDs[msg.detail.peerID]
+  NamePeer = msg.peerIDs[msg.peerID]
   var textArea = 'Your Telegram History'
   if (PeerID >=0){
-    textArea += ' with ' + NamePeer + '\n'
+    textArea += ' with ' + NamePeer + NL
   }else{
-    textArea += ' in "' + NamePeer + '"\n'
+    textArea += ' in "' + NamePeer + '"' + NL
   }
-  var messages = msg.detail.historyMessages
-  var countMessages = msg.detail.countMessages
+  var messages = msg.historyMessages
+  var countMessages = msg.countMessages
   var firstDate = messages[messages.length-1].date
   var linesAfterMessages = []
   var receivedMsg = []
   linesAfterMessages.push(getLineNumberFromString(textArea))
-  for(var i=msg.detail.historyMessages.length-1; i>=0; i--){
+  for(var i=msg.historyMessages.length-1; i>=0; i--){
     var msgWrap = messages[i]
     //var msgId = msgWrap.msgHiddenInfo.msg_id
     //var photoId = msgWrap.msgHiddenInfo.photo_id // if exists
     //console.log(messages[i].hiddeninfo)
     var curDateTimeFormatted = msgWrap.date
     var senderID = msgWrap.sender
-    var author = msg.detail.peerIDs[senderID]
-    if (senderID == msg.detail.myID){
+    var author = msg.peerIDs[senderID]
+    if (senderID == msg.myID){
       author += "(you)";
     }
     var fwd_senderID = msgWrap.fwd_sender
-    //console.log('fwd_senderID = ' + fwd_senderID)
-
     var metainfoFwd = ''
     if (fwd_senderID && fwd_senderID != ''){
-      var fwd_sender = msg.detail.peerIDs[fwd_senderID]
+      var fwd_sender = msg.peerIDs[fwd_senderID]
       var fwd_dateTimeFormatted = msgWrap.fwd_date
-      metainfoFwd =  '{{FWD: ' + fwd_sender +', '+fwd_dateTimeFormatted+'}}\n'
+      metainfoFwd =  '{{FWD: ' + fwd_sender +', '+fwd_dateTimeFormatted+'}}' + NL
     }
     var text = msgWrap.text || ''
     var metainfo = msgWrap.metainfo || ''
@@ -82,42 +127,45 @@ function displayMessages(msg){
       msgFormatted += '.....'
     }
     msgFormatted += formatMsg(currentFormat,curDateTimeFormatted,author, metainfoFwd + metainfo + text)
-    textArea += "\n" + msgFormatted
+    textArea += NL + msgFormatted
     linesAfterMessages.push(linesAfterMessages[linesAfterMessages.length-1] + getLineNumberFromString(msgFormatted))
     //receivedMsg.push($.extend(messages[i].hiddeninfo))
     receivedMsg.push({msg_id:messages[i].hiddeninfo.msg_id, photo_id: messages[i].hiddeninfo.photo_id})
   }
   linesAfterMessages.reverse()
   receivedMsg.reverse()
-  $('#myTextarea').html(textArea).text()
-  //$('#myTextarea').val(textArea)
+  editor.setValue(textArea, -1)
+  editor.gotoLine(0)
+  editor.focus()
   if (first_request){
     first_request = false
-    restoreTextareaScroll('#myTextarea')
+    restoreAceState()
   }
-  renderCountPhotos(msg.detail.countPhotos)
-  renderSaveAs(true)
+  
   //Update status
-  var elapsedTime = new Date()-last_request_time
+  var elapsedTime = new Date()-last_request_time()
   var logMsg = ' History from ' + firstDate+"."
-         + '\n Size: ' + friendlySize(textArea.length) +' characters,'
-         + ' ' + friendlySize(getLineNumberFromString($('#myTextarea').val())) + ' lines.'
-         + '\n '+friendlySize(messages.length)+' messages out of '+ friendlySize(countMessages)
+         + NL + ' Size: ' + friendlySize(textArea.length) +' characters,'
+         + ' ' + friendlySize(editor.session.getLength()) + ' lines.'
+         + NL +' '+friendlySize(messages.length)+' messages out of '+ friendlySize(countMessages)
          + ' ('+Math.floor(100 * messages.length / countMessages)+'%).'
          + ' Time ' + elapsedTime/1000.0 + ' sec.'
   console.log(logMsg)
   $('#txtAreaStatus').val(logMsg)
   ReceivedMsg = receivedMsg
   LinesAfterMessages = linesAfterMessages
-  enableButtons(true)
+  enableButtons(true, msg.countPhotos)
 }
 
 function communicate(commandText, value){
   enableButtons(false)
-  last_request_time = new Date()
+  chrome.extension.getBackgroundPage().last_request_time = new Date()
   console.log("sending "+commandText +" with value="+value)
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {text: commandText, value: value}, null)
+    chrome.tabs.sendMessage(tabs[0].id, {
+      text: commandText, 
+      value: value
+    }, null)
   })
 }
 
@@ -142,12 +190,13 @@ function requestMoreHistory(limit){
   startProgress()
 }
 
-function enableButtons(enable){
+function enableButtons(enable, cntPhotos=0){
   $('button').attr('disabled', !enable)
   if (enable){
     isShowProgress = false
   }
   $('#btnClose').attr('disabled', false)
+  //$('.btnPhoto').attr('disabled', cntPhotos==0 || !enable)
 }
 
 //--------------ProgressBar part
@@ -161,8 +210,7 @@ function precision_one_digit(t){
 function showProgress(){
   // last_request_time
   var t = new Date().getTime()
-  var elapsed_sec = precision_one_digit((t - last_request_time) / 1000)
-  //var elapsed_sec = Math.floor((t - last_request_time) / 100) / 10
+  var elapsed_sec = precision_one_digit((t - last_request_time()) / 1000)
   var min = Math.floor(elapsed_sec / 60)
   var sec = precision_one_digit(elapsed_sec - min * 60)
   var str = "" + sec 
@@ -196,8 +244,7 @@ function stopProgress(){
 //--------------- end of ProgressBar part
 
 function checkConnection(){
-  renderCountPhotos(0)
-  renderSaveAs(false)
+  enableButtons(false)
   console.log("Checking connection with main page.")
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, {text: 'stch_check_conn'}, function(response){
@@ -206,22 +253,17 @@ function checkConnection(){
         console.log('connection to main page: ok');
         enableButtons(true)
         requestCurrentHistory()
+        editor.setValue(defaultTextWait,-1)
       }else{
         //TODO undefined! do smth useful!
         connectionOK = false
         console.log('no response from the main tab.');
-        $('#myTextarea').val(defaultTextHint);
+        editor.setValue(defaultTextHint, -1)
         enableButtons(false)
       }
-    });
+    })
   });
 }
-
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-  chrome.runtime.onMessage.addListener(function(msg) {
-    displayMessages(msg)
-  })
-})
 
 var limitMAX = 200000000
 
@@ -231,37 +273,8 @@ function prepareButton(butId, limit){
   });
 }
 
-function renderCountPhotos(cntPhotos){
-  var but = document.getElementById("btnOpenPhotos")
-  but.disabled = cntPhotos == 0
-  but.innerHTML = 'Open photos'
-  var but2 = document.getElementById('btnOpenPrevPhoto')
-  but2.disabled = cntPhotos == 0
-  but2.innerHTML = 'prev'
-  var but3 = document.getElementById('btnOpenNextPhoto')
-  but3.disabled = cntPhotos == 0
-  but3.innerHTML = 'next'
-}
-
-function renderSaveAs(enable){
-  var but = document.getElementById("btnSaveAs")
-  but.disabled = !enable //isShowProgress
-  but.innerHTML = 'Save As Text'
-}
-
-function restoreTextareaScroll(textarea){
-  var value = chrome.extension.getBackgroundPage().textAreaScroll
-  $(textarea).scrollTop(value)
-}
-
-function textareaCursorChanged(textarea){
-  myTextAreaLineNumber = getLineNumber(textarea)
-  console.log(""+myTextAreaLineNumber)
-}
-
-
 function openPhoto(sign){
-  myTextAreaLineNumber = getLineNumber($('#myTextarea')[0])
+  myTextAreaLineNumber = getAceLineNumber()
   var idx = binSearch(LinesAfterMessages, myTextAreaLineNumber, function(a,b){return b-a})
   if (idx < 0){
     idx = -idx
@@ -282,6 +295,8 @@ function openPhoto(sign){
 
 document.addEventListener('DOMContentLoaded', function() {
   chrome.storage.sync.get(defaultMapFormats, function(items) {
+    initAce()
+
     var fmtSelected = items['selected']
     currentFormat = prepareFormat(items[fmtSelected])
     
@@ -315,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
       openPhoto(-1) // inversed order
     })
     $('#btnSaveAs').click(function(){
-      var text = $('#myTextarea').val()
+      var text = editor.getValue()
       var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
       var dateSave = formatDateForFileName(new Date)
       if (PeerID >=0){
@@ -327,13 +342,13 @@ document.addEventListener('DOMContentLoaded', function() {
     })
 
     $('#myTextarea').keyup(function(){
-      textareaCursorChanged(this)
+      storeAceState()
     })
     $('#myTextarea').mouseup(function(){
-      textareaCursorChanged(this)
+      storeAceState()
     })
-    $('#myTextarea').scroll(function(){
-      chrome.extension.getBackgroundPage().textAreaScroll = this.scrollTop
+    editor.getSession().on('changeScrollTop',function(scroll) {
+      storeAceState()
     })
   })
 })

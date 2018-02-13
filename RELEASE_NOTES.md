@@ -1,5 +1,14 @@
 ###Release Notes
 
+February 12, 2018 --- Version 2.2.4
+* Added @username for users and groups
+* html usernames displayed as text
+
+
+February 5, 2018 --- Version 2.2.3
+???
+
+
 February 5, 2018 --- Version 2.2.2
 * Fixed bug when a chat contains phone calls
 

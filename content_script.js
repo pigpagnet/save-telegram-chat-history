@@ -12,7 +12,6 @@ inject_script('inject.js')
 console.log("script injected.")
 
 document.addEventListener('from_injected', function(e) {
-    //console.log("sending message with history to extension");
     chrome.runtime.sendMessage({detail: e.detail}, null);
 });
 
@@ -28,6 +27,7 @@ function scrollUp(){
 
 chrome.runtime.onMessage.addListener(function (request_msg, sender, sendResponse) {
     console.log('content script received request '+request_msg.text);
+    document.dispatchEvent(new CustomEvent('to_injected_status', {}));
     if (request_msg.text === 'stch_check_conn') {
         sendResponse({text : "OK"})
     }

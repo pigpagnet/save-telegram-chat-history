@@ -62,14 +62,16 @@
       }
       
     </style>
-    <script src="jquery-1.12.0.min.js"></script>
-    <script src="angular-1.5.8.min.js"></script>
-    <script src="FileSaver.min_20170301.js"></script>
+    <script src="lib/ace-2018.02.11.min.js"></script>
+    <script src="lib/jquery-1.12.0.min.js"></script>
+    <script src="lib/angular-1.5.8.min.js"></script>
+    <script src="lib/FileSaver.min_20170301.js"></script>
     <script src="generic_tools.js"></script>
     <script src="popup.js"></script>
   </head>
   <body>
-    <textarea id="myTextarea" ></textarea>
+    <!-- <textarea id="myTextarea" ></textarea> -->
+    <div id='myTextarea'></div>
     <div class='container separator'>
       <table class='tableGrid row_cell row_cell_heigth '>
         <tr><td><div class='row_cell'>Load</div></td></tr>
@@ -101,13 +103,13 @@
     <table>
       <tr>
         <td><div>Cursor photo</div></td>
-        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenPrevPhoto" type="button" disabled></button></div></td>
-        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenNextPhoto" type="button" disabled></button></div></td>
+        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenPrevPhoto" type="button" disabled>prev</button></div></td>
+        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenNextPhoto" type="button" disabled>next</button></div></td>
       </tr>
       <tr>
         
-        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenPhotos" type="button" disabled></button></div></td>
-        <td><div class='row_cell'><button class="btnSaveAs" id="btnSaveAs" type="button" disabled></button></div></td>
+        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenPhotos" type="button" disabled>Open photos</button></div></td>
+        <td><div class='row_cell'><button class="btnSaveAs" id="btnSaveAs" type="button" disabled>Save As Text</button></div></td>
         <td><div class='row_cell'><button class="btnIcon" id="btnClose" type="button" disabled>Close</button></div></td>
       </tr>
     </table>

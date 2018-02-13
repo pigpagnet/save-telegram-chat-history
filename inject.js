@@ -12,7 +12,22 @@ var countMessages
 var photo_ids // {'msg_id', 'photo_id'}
 var photosData
 
+var Ready
 
+function notify_status(){
+	document.dispatchEvent(new CustomEvent('from_injected', {
+		detail:{
+			status: (Ready ? 'ready':'working'),
+		}
+	}))
+}
+
+function setReady(ready){
+	if (Ready != ready){
+		Ready = ready
+		notify_status()
+	}
+}
 
 function clear(){
 	historyForPeerID = 0
@@ -22,6 +37,7 @@ function clear(){
 	countMessages = -1
 	photo_ids = []
 	photosData = []
+	setReady(true)
 	console.log('cleared')
 }
 
@@ -59,6 +75,7 @@ function sendHistory(){
 			countPhotos: photosData && photosData.count ? photosData.count : 0,
 		}
 	}))
+	setReady(true)
 }
 
 function getPhotosData(AppPhotMng, userID){
@@ -72,7 +89,7 @@ function getPhotosData(AppPhotMng, userID){
 function updateCache_PeerFullName(userID,AppUsrMng){
 	if (!(userID in peerIDs)){
 		var userObject = AppUsrMng.getUser(userID)
-		if (userObject.pFlags.deleted){
+		if (userObject.deleted || (userObject.pFlags && userObject.pFlags.deleted)){
 			peerIDs[userID] = 'DELETED'
 		}else{
 			peerIDs[userID] = userObject.first_name
@@ -197,7 +214,7 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 				updateCache_PeerFullName(fwdSender,AppUsrMng)
 			}
 			if (msgWrap.media){
-				console.log('found media type of the message, date = '+msgDate)
+				console.log('found ' + msgWrap.media._ + ' media type of the message, date = '+msgDate)
 				switch (msgWrap.media._) {
 					case 'messageMediaPhoto':
 						var photoId = msgWrap.media.photo.id
@@ -289,6 +306,7 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 }
 
 function handleMoreHistoryRequest(limit){
+	setReady(false)
 	var injector = angular.element(document).injector()
 	var AppMesManager = injector.get('AppMessagesManager')
 	var AppUsrManager = injector.get('AppUsersManager')
@@ -338,11 +356,19 @@ function prepare(){
 
 prepare()
 
+document.addEventListener ("to_injected_status", function(e){
+	notify_status()
+}, false);
+
 document.addEventListener ("to_injected_get_more", function(e){	
+	if (!Ready)
+		return
 	handleMoreHistoryRequest(e.detail)
 }, false);
 
 document.addEventListener ("to_injected_current", function(){
+	if (!Ready)
+		return
 	if (countMessages>=0)
 		handleCurrentHistoryRequest()
 	else
@@ -350,6 +376,8 @@ document.addEventListener ("to_injected_current", function(){
 }, false);
 
 document.addEventListener ("to_injected_open_photos", function(e){	
+	if (!Ready)
+		return
 	var injector = angular.element(document).injector()
 	var AppPhotManager = injector.get('AppPhotosManager')
 	if (photo_ids.length > 0){
