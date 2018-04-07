@@ -293,6 +293,35 @@ function openPhoto(sign){
   console.log('no open photo requests has been sent')
 }
 
+function revokeURL(downloadId){
+  setTimeout(function(){
+    chrome.downloads.search({id: downloadId}, function(downloadItems){
+      if (downloadItems && downloadItems.length == 1){
+        var downloadItem = downloadItems[0]
+        if (downloadItem.state=="in_progress"){
+          console.log('waiting to complete URL for '+downloadItem.filename)
+          revokeURL(downloadId)
+        }else{
+          console.log('revoked URL for '+downloadItem.filename)
+        }
+      }else{
+        console.log('found no downloads via API')
+      }
+    })
+  }, 5000)
+}
+
+function chromeSaveAs(blob, fname){
+  var url = window.URL.createObjectURL(blob)
+  chrome.downloads.download({
+    url: url,
+    filename: fname,
+    saveAs: true
+  }, function(downloadId){
+    revokeURL(downloadId)
+  })
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   chrome.storage.sync.get(defaultMapFormats, function(items) {
     initAce()
@@ -334,11 +363,10 @@ document.addEventListener('DOMContentLoaded', function() {
       var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
       var dateSave = formatDateForFileName(new Date)
       if (PeerID >=0){
-        saveAs(blob, "telegram_chat_history__"+NamePeer+"__"+dateSave+".txt");
+        chromeSaveAs(blob, "telegram_chat_history__"+NamePeer+"__"+dateSave+".txt");
       }else{
-        saveAs(blob, "telegram_group_history__"+NamePeer+"__"+dateSave+".txt");
+        chromeSaveAs(blob, "telegram_group_history__"+NamePeer+"__"+dateSave+".txt");
       }
-      
     })
 
     $('#myTextarea').keyup(function(){
