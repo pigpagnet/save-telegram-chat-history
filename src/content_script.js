@@ -7,8 +7,8 @@ function inject_script(script_name){
 	//};
 }
 
-inject_script('generic_tools.js')
-inject_script('inject.js')
+inject_script('src/generic_tools.js')
+inject_script('src/inject.js')
 console.log("script injected.")
 
 document.addEventListener('from_injected', function(e) {

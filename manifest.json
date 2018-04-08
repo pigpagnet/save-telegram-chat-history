@@ -3,7 +3,7 @@
 
   "name": "Save Telegram Chat History",
   "description": "Dumps your Telegram chat history with an active peer to plaintext.",
-  "version": "2.2.6",
+  "version": "2.2.7",
   "author": "pigpag.net",
   "homepage_url": "https://github.com/pigpagnet/save-telegram-chat-history",
 
@@ -14,23 +14,23 @@
   },
 
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["src/background.js"]
   },
 
   "browser_action": {
     "default_icon": "icons/icon16.png",
-    "default_popup": "popup.html",
+    "default_popup": "src/popup.html",
     "default_title": "Save Telegram Chat History"
   },
   
   "content_scripts": [
     {
       "matches": ["https://web.telegram.org/*"],
-      "js": ["lib/jquery-1.12.0.min.js", "lib/angular-1.5.8.min.js","lib/jquery.nanoscroller.0.8.7.js", "content_script.js"]
+      "js": ["lib/jquery-1.12.0.min.js", "lib/angular-1.5.8.min.js","lib/jquery.nanoscroller.0.8.7.js", "src/content_script.js"]
     }
   ],
   
-  "options_page": "options.html",
+  "options_page": "src/options.html",
   
   "permissions": [
     "activeTab",
@@ -38,5 +38,5 @@
     "downloads"
   ],
   
-  "web_accessible_resources": ["generic_tools.js","inject.js"]
+  "web_accessible_resources": ["src/generic_tools.js","src/inject.js"]
 }
