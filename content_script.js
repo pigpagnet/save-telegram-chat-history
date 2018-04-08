@@ -24,19 +24,27 @@ function scrollUp(){
     setTimeout(scrollUp, 1000);
   }
 }*/
+dateFormat = null
 
 chrome.runtime.onMessage.addListener(function (request_msg, sender, sendResponse) {
-    console.log('content script received request '+request_msg.text);
-    document.dispatchEvent(new CustomEvent('to_injected_status', {}));
+    console.log('content script received request '+request_msg.text)
     if (request_msg.text === 'stch_check_conn') {
-        sendResponse({text : "OK"})
+      dateFormat = request_msg.dateFormat
+    }
+    document.dispatchEvent(new CustomEvent('to_injected_status', {}))
+    if (request_msg.text === 'stch_check_conn') {
+      sendResponse({text : "OK"})
     }
     if (request_msg.text === 'stch_load_current_history') {
-        document.dispatchEvent(new CustomEvent('to_injected_current', {}));
+        document.dispatchEvent(new CustomEvent('to_injected_current', {'detail': {
+          dateFormat: dateFormat
+        }}));
     }
     if (request_msg.text === 'stch_load_more_history') {
-        document.dispatchEvent(new CustomEvent('to_injected_get_more', 
-            {'detail':request_msg.value}));
+        document.dispatchEvent(new CustomEvent('to_injected_get_more', {'detail': {
+          value: request_msg.value,
+          dateFormat: dateFormat
+        }}));
     }
     if (request_msg.text === 'stch_open_photos') {
         document.dispatchEvent(new CustomEvent('to_injected_open_photos',

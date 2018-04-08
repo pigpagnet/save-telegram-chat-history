@@ -60,7 +60,16 @@
       .separator{
         margin-top: 0.3cm
       }
-      
+      .btnWithIcon:disabled{
+        opacity: 0.3;
+      }
+      div.text{
+        border:1px solid grey;
+      }
+      .cursorPhoto{
+        height: 20px;
+        background: url('icons/if_button_cursor_352911_16x16.png') no-repeat center;
+      }
     </style>
     <script src="lib/ace-2018.02.11.min.js"></script>
     <script src="lib/jquery-1.12.0.min.js"></script>
@@ -101,16 +110,21 @@
    
     <table>
       <tr>
-        <td><div>Cursor photo</div></td>
-        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenPrevPhoto" type="button" disabled>prev</button></div></td>
-        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenNextPhoto" type="button" disabled>next</button></div></td>
+        <td><div class='row_cell'><button class="btnPhoto btnWithIcon" id="btnOpenPhotos" type="button" title="Open photos (a photo will be shown if any found)" disabled><img src="icons/if_32_171485_image_16x16.png"/></button></div></td>
+        <td><div class='text cursorPhoto' title="Use arrows to open a photo (if found in the current history) that was sent..."></div></td>
+        <td><div class='row_cell'><button class="btnPhoto btnWithIcon" id="btnOpenPrevPhoto" type="button" title="...right before the date that cursor position is referring to." disabled><img src="icons/if_arrow-left_227602_16x16.png"/></button></div></td>
+        <td><div class='row_cell'><button class="btnPhoto btnWithIcon" id="btnOpenNextPhoto" type="button" title="...right after the date that cursor position is referring to." disabled><img src="icons/if_arrow-right_227601_16x16.png"/></button></div></td>
       </tr>
       <tr>
-        
-        <td><div class='row_cell'><button class="btnPhoto" id="btnOpenPhotos" type="button" disabled>Open photos</button></div></td>
-        <td><div class='row_cell'><button class="btnSaveAs" id="btnSaveAs" type="button" disabled>Save As Text</button></div></td>
-        <td><div class='row_cell'><button class="btnIcon" id="btnClose" type="button" disabled>Close</button></div></td>
+
+
+        <td></td>
+        <td><div class='row_cell'><button class="btnSaveAs btnWithIcon" id="btnSaveAs" type="button" title="Save As Text" disabled><img src="icons/if_save_42337_16x16.png"/></button></div></td>
+        <td><div><button class="btnOptions btnWithIcon" id="btnOptions" title="Configure"><img src='icons/if_configure_9227_16x16.png'/></button></div></td>
+        <td><div class='row_cell'><button class="btnWithIcon" id="btnClose" type="button" title="Close this popup window" disabled><img src="icons/if_ic_close_48px_352270_16x16.png"/></button></div></td>
       </tr>
     </table>
+    <!-- Icons are downloaded from https://www.iconfinder.com/ -->
+    
   </body>
 </html>

@@ -1,55 +1,99 @@
 // Message format
-defaultMapFormats = {
+defaultFormatSettings = {
   formatCompact:"dt, u: m",
   formatLarge:"u [dt]\\nm\\n",
   formatCustom:"",
-  selected:"formatCompact",  
-};
+  formatSelected:"formatCompact",
 
-function formatMsg(format, datetime, username, text){
-  var msg = format;
+  formatDate1:"D.M.Y H:m:s",
+  formatDate2:"Y/M/D h:m:s a",
+  formatDateCustom:"",
+  formatDateSelected: "formatDate1",
+}
+
+
+
+
+function formatMsg(msgFormat, datetime, username, text){
+  var msg = msgFormat
   var mapObj = {
     dt:datetime,
-    d:datetime.substring(0,10),
-    t:datetime.substring(11,19),
+    //d:datetime.substring(0,10),
+    //t:datetime.substring(11,19),
     u:username,
     m:text,
-  };
-  var re = new RegExp(Object.keys(mapObj).join("|"),"gi");
+  }
+  // order is preserved in Object.keys
+  var re = new RegExp(Object.keys(mapObj).join("|"),"gi") 
   msg = msg.replace(re, function(matched){
-    return mapObj[matched];
-  });
-  return msg;
+    return mapObj[matched]
+  })
+  return msg
 }
 
 function prepareFormat(format) {
-  format = format.replace(/\\n/g, "\n");
-  format = format.replace(/\\t/g, "\t");
-  return format;
+  format = format.replace(/\\n/g, "\n")
+  format = format.replace(/\\t/g, "\t")
+  return format
 }
-
-
 
 // Argument is of type Date.
 // Some examples:
 //   d = new Date();  // current date
 //   d.setMonth(d.getMonth() - 3); // set 3 month prior to date
-function formatDate(d){
-  return lead(d.getDate())+'.'+lead(d.getMonth()+1)+'.'+d.getFullYear() + ' ' 
-    + lead(d.getHours()) + ':' + lead(d.getMinutes()) + ':' + lead(d.getSeconds());
-  //Example of output   31.12.2016 23:59:59
+//
+// Supported format symbols: Y, M, D, H, h, m, s, a.
+function formatDate(d, dateFormat){
+  var ampm = d.getHours()<12? 'a.m.' : 'p.m.'
+  var s = ''
+  for (var i=0; i<dateFormat.length; i++){
+    switch(dateFormat.charAt(i)){
+      case 'Y': 
+        s += ''+d.getFullYear() 
+        break
+      case 'M': 
+        s += lead(d.getMonth()+1)
+        break
+      case 'D': 
+        s += lead(d.getDate())
+        break
+      case 'H':
+        s += lead(d.getHours())
+        break
+      case 'h':
+        var h = d.getHours()
+        if (h==0)
+          h += 12
+        if (h>12)
+          h -= 12
+        s += '' + h
+        break
+      case 'm':
+        s += lead(d.getMinutes())
+        break
+      case 's':
+        s += lead(d.getSeconds())
+        break
+      case 'a':
+        s += ampm
+        break
+      default: 
+        s += dateFormat.charAt(i)
+    }
+  }
+  return s
 }
 
 function formatDateForFileName(d){
   return d.getFullYear() + '_' +lead(d.getMonth()+1)+'_' + lead(d.getDate()) +'--'
-    + lead(d.getHours()) + '-' + lead(d.getMinutes()) + '-' + lead(d.getSeconds());
+    + lead(d.getHours()) + '-' + lead(d.getMinutes()) + '-' + lead(d.getSeconds())
 }
 
 function lead(a){
-  var s = '0' + a;
+  var s = '0' + a
   if (s.length>2)
-    s = s.substr(1);
-  return s;
+    s = s.substr(1)
+  return s
 }
 
 function friendlySize(size){
@@ -63,8 +107,8 @@ function friendlySize(size){
 
 function formatCallDuration(time){
   var hrs = ~~(time / 3600);
-  var mins = ~~((time % 3600) / 60);
-  var secs = time % 60;
+  var mins = ~~((time % 3600) / 60)
+  var secs = time % 60
   // Output like "1:01" or "4:03:59" or "123:03:59"
   if (hrs > 0){
     return '' + hrs + ':' + lead(mins) + ':' + lead(secs)
@@ -81,7 +125,6 @@ function appendWithSpace(input_string, new_part){
   return input_string + new_part
 }
 
-
 function comparatorArithmetic(a,b){
   return a-b
 }
@@ -94,9 +137,9 @@ function binSearch(arr, val, comparator) {
   }
   var left = -1
   var right = arr.length + 1
-  while (right - left > 1){    
-    var mid = Math.floor((right + left) / 2)    
-    var cmp = comparator(arr[mid], val)        
+  while (right - left > 1){
+    var mid = Math.floor((right + left) / 2)
+    var cmp = comparator(arr[mid], val)
     if (cmp == 0){
       return mid
     }    
@@ -108,5 +151,3 @@ function binSearch(arr, val, comparator) {
   } 
   return -right
 }
-
-

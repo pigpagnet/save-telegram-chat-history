@@ -16,7 +16,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     if (msg.detail.status){
       bg_notify(msg.detail.status)
     }else{
-      var popups = chrome.extension.getViews({type: "popup"});
+      var popups = chrome.extension.getViews({type: "popup"})
       if (0 < popups.length)
         popups[0].displayMessages(msg)
     }

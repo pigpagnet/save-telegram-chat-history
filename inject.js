@@ -14,6 +14,9 @@ var photosData
 
 var Ready
 
+var dateFormat
+var updateDateBeforeSending
+
 function notify_status(){
 	document.dispatchEvent(new CustomEvent('from_injected', {
 		detail:{
@@ -37,26 +40,31 @@ function clear(){
 	countMessages = -1
 	photo_ids = []
 	photosData = []
+	updateDateBeforeSending = false
 	setReady(true)
 	console.log('cleared')
 }
 
-function storeMessage(messageDate, messageSender, messageTxt, messageMetaInfo, hiddenInfo, fwdMessageDate, fwdSender){
+function storeMessage(messageDateAsNumber, messageDate, messageSender, messageTxt, messageMetaInfo, hiddenInfo, 
+		fwdMessageDateAsNumber, fwdMessageDate, fwdSender){
 	historyMessages.push({
 		type: 'msg',
+		date_number: messageDateAsNumber,
 		date: messageDate,
 		sender: messageSender,
 		text: messageTxt,
 		metainfo: messageMetaInfo, // to display
 		hiddeninfo: hiddenInfo, // e.g. {mes_id:"", photo_id:""}
+		fwd_date_number: fwdMessageDateAsNumber,
 		fwd_date: fwdMessageDate,
 		fwd_sender: fwdSender,
 	})
 }
 
-function storeServiceMessage(messageDate, messageSender, messageText, hiddenInfo){
+function storeServiceMessage(messageDateAsNumber, messageDate, messageSender, messageText, hiddenInfo){
 	historyMessages.push({
 		type: 'service',
+		date_number: messageDateAsNumber,
 		date: messageDate,
 		sender: messageSender,
 		text: messageText,
@@ -65,6 +73,15 @@ function storeServiceMessage(messageDate, messageSender, messageText, hiddenInfo
 }
 
 function sendHistory(){
+	if (updateDateBeforeSending){
+		for(var i=0; i<historyMessages.length; i++){
+			historyMessages[i].date = formatDate(new Date(historyMessages[i].date_number * 1000), dateFormat)
+			if (historyMessages[i].fwd_date_number>0){
+				historyMessages[i].fwd_date = formatDate(new Date(historyMessages[i].fwd_date_number * 1000), dateFormat)
+			}
+		}
+		updateDateBeforeSending = false
+	}
 	document.dispatchEvent(new CustomEvent('from_injected', {
 		detail:{
 			myID: myID,
@@ -129,7 +146,7 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 		for(var i=0; i<messageIDs.length; i++){ //what order? date decreasing?
 			var msgWrap = AppMesMng.wrapForHistory(messageIDs[i])
 			var msgHiddenInfo = {msg_id: messageIDs[i]}
-			var msgDate = formatDate(new Date(msgWrap.date * 1000)) // we format here to avoid multiple formatting at popup.js
+			var msgDate = formatDate(new Date(msgWrap.date * 1000), dateFormat) // we format here to avoid multiple formatting at popup.js
 			var msgSender = msgWrap.fromID || msgWrap.from_id // ID
 			updateCache_PeerFullName(msgSender,AppUsrMng)
 			if (msgWrap._ == 'messageService'){
@@ -200,16 +217,18 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 					default:
 						msgServiceText = 'unsupported service message type: ' + msgWrap.action._
 				}
-				storeServiceMessage(msgDate,msgSender,'>>' + msgServiceText + '<<',msgHiddenInfo)
+				storeServiceMessage(msgWrap.date,msgDate,msgSender,'>>' + msgServiceText + '<<',msgHiddenInfo)
 				continue
 			}
 
 			var msgTxt = msgWrap.message
 			var msgMetaInfo = ''
+			var fwdMessageDateAsNumber = 0
 			var fwdMessageDate = ''
 			var fwdSender = ''
 			if (msgWrap.fwd_from){
-				fwdMessageDate = formatDate(new Date(msgWrap.fwd_from.date * 1000))
+				fwdMessageDateAsNumber = msgWrap.fwd_from.date
+				fwdMessageDate = formatDate(new Date(msgWrap.fwd_from.date * 1000), dateFormat)
 				fwdSender = msgWrap.fwd_from.from_id
 				updateCache_PeerFullName(fwdSender,AppUsrMng)
 			}
@@ -288,7 +307,8 @@ function processGetHistoryResponse(peerID,res,AppMesMng,AppUsrMng,AppChatsMng,Ap
 						console.log('found unknown type of media: '+msgWrap.media._)
 				}
 			}
-			storeMessage(msgDate,msgSender,msgTxt,msgMetaInfo,msgHiddenInfo,fwdMessageDate,fwdSender)
+			storeMessage(msgWrap.date, msgDate,msgSender,msgTxt,msgMetaInfo,msgHiddenInfo,
+				fwdMessageDateAsNumber,fwdMessageDate,fwdSender)
 		}
 		maxID = messageIDs[messageIDs.length-1]
 		console.log("fetched "+messageIDs.length+" messages in "
@@ -360,15 +380,25 @@ document.addEventListener ("to_injected_status", function(e){
 	notify_status()
 }, false);
 
+function retrieveDateFormat(detail){
+	var dateFormatNew = detail.dateFormat
+	if (dateFormat != dateFormatNew){
+		dateFormat = dateFormatNew
+		updateDateBeforeSending = true
+	}
+}
+
 document.addEventListener ("to_injected_get_more", function(e){	
 	if (!Ready)
 		return
-	handleMoreHistoryRequest(e.detail)
+	retrieveDateFormat(e.detail)
+	handleMoreHistoryRequest(e.detail.value)
 }, false);
 
-document.addEventListener ("to_injected_current", function(){
+document.addEventListener ("to_injected_current", function(e){
 	if (!Ready)
 		return
+	retrieveDateFormat(e.detail)
 	if (countMessages>=0)
 		handleCurrentHistoryRequest()
 	else

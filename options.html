@@ -34,7 +34,10 @@
 <table>
 <tr>
   <td>
-	<table id="table"></table>
+    <table id="tableFormat"></table>
+  </td>
+  <td>
+    <table id="tableFormatDate"></table>
   </td>
 </tr>
 <tr>
@@ -61,12 +64,24 @@
 You can create your own formats. Check out the following special symbols:<br/>
 <br/>
 dt = Date-time of the message.<br/>
-d = Date of the message.<br/>
-t = Time of the message.<br/>
+<!-- d = Date of the message.<br/> 
+t = Time of the message.<br/> -->
 u = Sender's name.<br/>
 m = Message body.<br/>
 \n = New line.<br/>
 \t = Tab character.<br/>
+<br/>
+<br/>
+For date formatting you can use the following special characters:<br/>
+<br/>
+Y = Year.<br/>
+M = Month as a number (01 for January, etc).<br/>
+D = Day.<br/>
+H = Hours in 24-hours format.<br/>
+h = Hours in 12-hours format.<br/>
+m = Minutes.<br/>
+s = Seconds.<br/>
+a = "a.m." or "p.m."<br/>
     </div>
   </td>
 </tr>

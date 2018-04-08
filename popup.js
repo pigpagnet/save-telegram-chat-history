@@ -15,7 +15,8 @@ defaultTextWait = "Please wait until messages are downloaded." + NL
 
 
 // User settings variables
-currentFormat = null;
+msgFormat = null
+dateFormat = null
 
 // State variables
 first_request = true //for restoring textarea scroll 
@@ -126,7 +127,7 @@ function displayMessages(msgWrap){
     if (msgWrap.type == 'service'){
       msgFormatted += '.....'
     }
-    msgFormatted += formatMsg(currentFormat,curDateTimeFormatted,author, metainfoFwd + metainfo + text)
+    msgFormatted += formatMsg(msgFormat,curDateTimeFormatted,author, metainfoFwd + metainfo + text)
     textArea += NL + msgFormatted
     linesAfterMessages.push(linesAfterMessages[linesAfterMessages.length-1] + getLineNumberFromString(msgFormatted))
     //receivedMsg.push($.extend(messages[i].hiddeninfo))
@@ -247,7 +248,7 @@ function checkConnection(){
   enableButtons(false)
   console.log("Checking connection with main page.")
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {text: 'stch_check_conn'}, function(response){
+    chrome.tabs.sendMessage(tabs[0].id, {text: 'stch_check_conn', dateFormat: dateFormat}, function(response){
       if (undefined != response){
         connectionOK = true
         console.log('connection to main page: ok');
@@ -299,13 +300,10 @@ function revokeURL(downloadId){
       if (downloadItems && downloadItems.length == 1){
         var downloadItem = downloadItems[0]
         if (downloadItem.state=="in_progress"){
-          console.log('waiting to complete URL for '+downloadItem.filename)
           revokeURL(downloadId)
         }else{
-          console.log('revoked URL for '+downloadItem.filename)
+          window.URL.revokeObjectURL(downloadItem.url)
         }
-      }else{
-        console.log('found no downloads via API')
       }
     })
   }, 5000)
@@ -323,12 +321,11 @@ function chromeSaveAs(blob, fname){
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  chrome.storage.sync.get(defaultMapFormats, function(items) {
+  chrome.storage.sync.get(defaultFormatSettings, function(items) {
     initAce()
+    msgFormat = prepareFormat(items[items['formatSelected']])
+    dateFormat = items[items['formatDateSelected']]
 
-    var fmtSelected = items['selected']
-    currentFormat = prepareFormat(items[fmtSelected])
-    
     // Prepare page
     $('#loadHistory .btnLoadGrid').click(function(){
       var s = this.innerText
@@ -343,10 +340,13 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     checkConnection()
 
+    $('#btnOptions').click(function(){
+      chrome.runtime.openOptionsPage()
+    })
     $('#btnClose').click(function (){
-      var daddy = window.self;
-      daddy.opener = window.self;
-      daddy.close();
+      var daddy = window.self
+      daddy.opener = window.self
+      daddy.close()
     })
     $('#btnOpenPhotos').click(function (){
       communicate('stch_open_photos')
@@ -360,12 +360,12 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     $('#btnSaveAs').click(function(){
       var text = editor.getValue()
-      var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+      var blob = new Blob([text], {type: "text/plain;charset=utf-8"})
       var dateSave = formatDateForFileName(new Date)
       if (PeerID >=0){
-        chromeSaveAs(blob, "telegram_chat_history__"+NamePeer+"__"+dateSave+".txt");
+        chromeSaveAs(blob, "telegram_chat_history__"+NamePeer+"__"+dateSave+".txt")
       }else{
-        chromeSaveAs(blob, "telegram_group_history__"+NamePeer+"__"+dateSave+".txt");
+        chromeSaveAs(blob, "telegram_group_history__"+NamePeer+"__"+dateSave+".txt")
       }
     })
 
