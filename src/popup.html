@@ -12,17 +12,17 @@
       }
       #myTextarea{
         overflow-y: scroll; 
-        min-width: 760px;
-        max-width: 760px;
+        min-width: 750px;
+        max-width: 750px;
         min-height: 300px;
         max-height: 300px;
       }
       #txtAreaStatus{
         overflow-y: scroll; 
-        min-width: 456px;
-        max-width: 456px;
-        min-height: 44px;
-        max-height: 44px;
+        min-width: 670px;
+        max-width: 670px;
+        min-height: 64px;
+        max-height: 64px;
         background-color: lightgrey;
       }
       .btnLoadGrid{
@@ -68,13 +68,19 @@
       }
       .cursorPhoto{
         height: 20px;
+        width: 20px;
         background: url('../icons/if_button_cursor_352911_16x16.png') no-repeat center;
+      }
+      .allocateSpace{
+        height: 20px;
+        width: 60px;
       }
     </style>
     <script src="../lib/ace-2018.02.11.min.js"></script>
     <script src="../lib/jquery-1.12.0.min.js"></script>
     <script src="../lib/angular-1.5.8.min.js"></script>
     <script src="generic_tools.js"></script>
+    <script src="page_control.js"></script>
     <script src="popup.js"></script>
   </head>
   <body>
@@ -103,28 +109,35 @@
         </tr>
       </table>
     </div>
-    <div class='row_cell'><textarea id="txtAreaStatus" readonly></textarea></div>
-    <table class='tableGrid row_cell row_cell_heigth '>
-      <tr><td><div id='progressBar' class='row_cell btnLoadGrid' readonly></div></td></tr>
-    </table>
-   
+
+<table><tr><td>
+    <div>
+      <div class='row_cell'><textarea id="txtAreaStatus" readonly></textarea></div>
+      <table class='tableGrid row_cell row_cell_heigth '>
+        <tr><td><div id='progressBar' class='row_cell btnLoadGrid' readonly></div></td></tr>
+      </table>
+    </div>
+</td></tr><tr><td>
+    <div>
     <table>
       <tr>
         <td><div class='row_cell'><button class="btnPhoto btnWithIcon" id="btnOpenPhotos" type="button" title="Open photos (a photo will be shown if any found)" disabled><img src="../icons/if_32_171485_image_16x16.png"/></button></div></td>
         <td><div class='text cursorPhoto' title="Use arrows to open a photo (if found in the current history) that was sent..."></div></td>
         <td><div class='row_cell'><button class="btnPhoto btnWithIcon" id="btnOpenPrevPhoto" type="button" title="...right before the date that cursor position is referring to." disabled><img src="../icons/if_arrow-left_227602_16x16.png"/></button></div></td>
         <td><div class='row_cell'><button class="btnPhoto btnWithIcon" id="btnOpenNextPhoto" type="button" title="...right after the date that cursor position is referring to." disabled><img src="../icons/if_arrow-right_227601_16x16.png"/></button></div></td>
-      </tr>
-      <tr>
-
-
-        <td></td>
-        <td><div class='row_cell'><button class="btnSaveAs btnWithIcon" id="btnSaveAs" type="button" title="Save As Text" disabled><img src="../icons/if_save_42337_16x16.png"/></button></div></td>
+      <!--</tr>
+      <tr>-->
+        <td><div class="allocateSpace"></div></td>
+        <td><div class="row_cell"><button class="btnSaveAs btnWithIcon" id="btnSaveAs" type="button" title="Save As Text" disabled><img src="../icons/if_save_42337_16x16.png"/></button></div></td>
         <td><div><button class="btnOptions btnWithIcon" id="btnOptions" title="Configure"><img src='../icons/if_configure_9227_16x16.png'/></button></div></td>
+        <td><div class="allocateSpace"></div></td>
+        <td><div id="pageControl">Page Control</div></td>
+        <td><div class="allocateSpace"></div></td>
         <td><div class='row_cell'><button class="btnWithIcon" id="btnClose" type="button" title="Close this popup window" disabled><img src="../icons/if_ic_close_48px_352270_16x16.png"/></button></div></td>
       </tr>
     </table>
-    <!-- Icons are downloaded from https://www.iconfinder.com/ -->
-    
+    </div>
+</td></tr></table>
   </body>
 </html>
+<!-- Icons are downloaded from https://www.iconfinder.com/ -->

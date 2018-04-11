@@ -9,6 +9,8 @@ defaultFormatSettings = {
   formatDate2:"Y/M/D h:m:s a",
   formatDateCustom:"",
   formatDateSelected: "formatDate1",
+
+  pageLimit: 10000,
 }
 
 
@@ -84,6 +86,10 @@ function formatDate(d, dateFormat){
   return s
 }
 
+function formatDateInt(date_int, dateFormat){
+  return formatDate(new Date(date_int * 1000), dateFormat)
+}
+
 function formatDateForFileName(d){
   return d.getFullYear() + '_' +lead(d.getMonth()+1)+'_' + lead(d.getDate()) +'--'
     + lead(d.getHours()) + '-' + lead(d.getMinutes()) + '-' + lead(d.getSeconds())
@@ -106,7 +112,7 @@ function friendlySize(size){
 }
 
 function formatCallDuration(time){
-  var hrs = ~~(time / 3600);
+  var hrs = ~~(time / 3600)
   var mins = ~~((time % 3600) / 60)
   var secs = time % 60
   // Output like "1:01" or "4:03:59" or "123:03:59"

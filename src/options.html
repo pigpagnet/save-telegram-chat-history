@@ -23,6 +23,9 @@
       max-height: 100px;
       background-color: lightgrey;
     }
+    #save{
+      min-height: 50px
+    }
   </style>
   <script src="../lib/jquery-1.12.0.min.js"></script>
   <script src="generic_tools.js"></script>
@@ -30,7 +33,20 @@
 </head>
 <body>
 <h2>Save Telegram Chat History Options</h2>
+<h3>Page limit</h3>
+<div>
+How many messages should be displayed at once
+<form action="">
+  <input type="radio" name="limit" value="1000"/><label>1k</label>
+  <input type="radio" name="limit" value="3000"/><label>3k</label>
+  <input type="radio" name="limit" value="10000"/><label>10k</label>
+  <input type="radio" name="limit" value="30000"/><label>30k</label>
+  <input type="radio" name="limit" value="100000"/><label>100k</label>
+  <input type="radio" name="limit" value="0"/><label>all</label>
+</form>
+</div>
 
+<h3>Format Settings</h3>
 <table>
 <tr>
   <td>
@@ -52,7 +68,7 @@
  </tr>
  <tr>
   <td>	
-	<button id="save">Save Preferences</button>	
+	<button id="save" title="Save page limit and format settings">Save Preferences</button>	
   </td>
   <td><div id="status"></div></td>
 </tr>

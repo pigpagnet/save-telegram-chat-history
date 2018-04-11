@@ -2,6 +2,7 @@ var aceTopScroll = 0
 var aceCurRow = 0
 var Status  // 'working' or 'ready'
 var last_request_time
+var pageNo
 
 function bg_notify(status){
   Status = status

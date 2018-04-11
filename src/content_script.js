@@ -25,11 +25,13 @@ function scrollUp(){
   }
 }*/
 dateFormat = null
+pageLimit = null
 
 chrome.runtime.onMessage.addListener(function (request_msg, sender, sendResponse) {
     console.log('content script received request '+request_msg.text)
     if (request_msg.text === 'stch_check_conn') {
-      dateFormat = request_msg.dateFormat
+      dateFormat = request_msg.dateFormat,
+      pageLimit = request_msg.pageLimit
     }
     document.dispatchEvent(new CustomEvent('to_injected_status', {}))
     if (request_msg.text === 'stch_check_conn') {
@@ -37,13 +39,17 @@ chrome.runtime.onMessage.addListener(function (request_msg, sender, sendResponse
     }
     if (request_msg.text === 'stch_load_current_history') {
         document.dispatchEvent(new CustomEvent('to_injected_current', {'detail': {
-          dateFormat: dateFormat
+          dateFormat: dateFormat,
+          pageLimit: pageLimit,
+          pageNo: request_msg.pageNo,
         }}));
     }
     if (request_msg.text === 'stch_load_more_history') {
         document.dispatchEvent(new CustomEvent('to_injected_get_more', {'detail': {
           value: request_msg.value,
-          dateFormat: dateFormat
+          dateFormat: dateFormat,
+          pageLimit: pageLimit,
+          pageNo: request_msg.pageNo,
         }}));
     }
     if (request_msg.text === 'stch_open_photos') {

@@ -16,6 +16,8 @@ var Ready
 
 var dateFormat
 var updateDateBeforeSending
+var pageNo
+var pageLimit
 
 function notify_status(){
 	document.dispatchEvent(new CustomEvent('from_injected', {
@@ -42,6 +44,8 @@ function clear(){
 	photosData = []
 	updateDateBeforeSending = false
 	setReady(true)
+	pageNo = 1
+	//pageLimit = 0
 	console.log('cleared')
 }
 
@@ -82,14 +86,38 @@ function sendHistory(){
 		}
 		updateDateBeforeSending = false
 	}
+	var pages = 0
+	var historyMessagesView = null
+	if (pageLimit<=0){
+		pages = 1
+		pageNo = 1
+		historyMessagesView = historyMessages
+	}else{
+		pages = ~~(historyMessages.length / pageLimit)
+		if (pages * pageLimit < historyMessages.length){
+			pages += 1
+		}
+		pageNo = Math.min(pageNo, pages)
+		historyMessagesView = historyMessages.slice(
+			(pageNo-1)*pageLimit, pageNo*pageLimit)
+	}
+	var firstMessageDate = 'not available'
+	if (historyMessages.length>0){
+		firstMessageDate = historyMessages[historyMessages.length-1].date
+	}
+	console.log('message view has '+historyMessagesView.length+' messages')
 	document.dispatchEvent(new CustomEvent('from_injected', {
 		detail:{
 			myID: myID,
 			peerID: historyForPeerID,
-			historyMessages: historyMessages,
+			historyMessages: historyMessagesView,
+			firstMessageDate: historyMessages[historyMessages.length-1].date,
 			peerIDs: peerIDs,
 			countMessages: countMessages,
+			countMessagesFetched: historyMessages.length,
 			countPhotos: photosData && photosData.count ? photosData.count : 0,
+			pages: pages,
+			pageNo: pageNo,
 		}
 	}))
 	setReady(true)
@@ -380,25 +408,27 @@ document.addEventListener ("to_injected_status", function(e){
 	notify_status()
 }, false);
 
-function retrieveDateFormat(detail){
+function retrieveMetaData(detail){
 	var dateFormatNew = detail.dateFormat
 	if (dateFormat != dateFormatNew){
 		dateFormat = dateFormatNew
 		updateDateBeforeSending = true
 	}
+	pageLimit = detail.pageLimit
+	pageNo = detail.pageNo
 }
 
 document.addEventListener ("to_injected_get_more", function(e){	
 	if (!Ready)
 		return
-	retrieveDateFormat(e.detail)
+	retrieveMetaData(e.detail)
 	handleMoreHistoryRequest(e.detail.value)
 }, false);
 
 document.addEventListener ("to_injected_current", function(e){
 	if (!Ready)
 		return
-	retrieveDateFormat(e.detail)
+	retrieveMetaData(e.detail)
 	if (countMessages>=0)
 		handleCurrentHistoryRequest()
 	else

@@ -17,6 +17,7 @@ defaultTextWait = "Please wait until messages are downloaded." + NL
 // User settings variables
 msgFormat = null
 dateFormat = null
+pageLimit = null
 
 // State variables
 first_request = true //for restoring textarea scroll 
@@ -37,6 +38,8 @@ function getLineNumberFromString(str){
 
 var ReceivedMsg
 var LinesAfterMessages
+var FirstDateShown
+var LastDateShown
 
 var PeerID
 var NamePeer
@@ -64,13 +67,19 @@ function getAceLineNumber(){
 }
 
 function restoreAceState(){
+  //restore ace state
   var scrollTop = chrome.extension.getBackgroundPage().aceTopScroll
   var curRow = chrome.extension.getBackgroundPage().aceCurRow
   editor.selection.moveTo(curRow, 0)
   editor.getSession().setScrollTop(scrollTop || 0)
 }
 
+function storePageNo(pageNo){
+  chrome.extension.getBackgroundPage().pageNo = pageNo
+}
+
 function storeAceState(){
+  //store ace state
   scrollTop = editor.renderer.getScrollTop()
   aceCurRow = getAceLineNumber()
   if (scrollTop < 0)
@@ -81,6 +90,9 @@ function storeAceState(){
 
 function displayMessages(msgWrap){
   var msg = msgWrap.detail
+  page_control_set_page(msg.pageNo)
+  page_control_set_total_pages(msg.pages)
+
   PeerID = msg.peerID
   if (PeerID == 0){
     $('#myTextarea').val(defaultTextHint)
@@ -97,7 +109,8 @@ function displayMessages(msgWrap){
   }
   var messages = msg.historyMessages
   var countMessages = msg.countMessages
-  var firstDate = messages[messages.length-1].date
+  var firstDateShown = messages[messages.length-1].date_number
+  var lastDateShown = messages[0].date_number
   var linesAfterMessages = []
   var receivedMsg = []
   linesAfterMessages.push(getLineNumberFromString(textArea))
@@ -142,30 +155,38 @@ function displayMessages(msgWrap){
     first_request = false
     restoreAceState()
   }
-  
   //Update status
   var elapsedTime = new Date()-last_request_time()
-  var logMsg = ' History from ' + firstDate+"."
-         + NL + ' Size: ' + friendlySize(textArea.length) +' characters,'
-         + ' ' + friendlySize(editor.session.getLength()) + ' lines.'
-         + NL +' '+friendlySize(messages.length)+' messages out of '+ friendlySize(countMessages)
+  var logMsg = 'History from ' +msg.firstMessageDate+"."
+         + NL + 'Fetched '+friendlySize(msg.countMessagesFetched)+' messages out of '+ friendlySize(countMessages)
          + ' ('+Math.floor(100 * messages.length / countMessages)+'%).'
+         + NL + 'Shown ' + friendlySize(messages.length) + ' messages'
+         +' from '+formatDateInt(firstDateShown,dateFormat)
+         +' to '+formatDateInt(lastDateShown,dateFormat)+'.' 
+         + NL + 'Size: ' + friendlySize(textArea.length) +' characters,'
+         + ' ' + friendlySize(editor.session.getLength()) + ' lines.'
          + ' Time ' + elapsedTime/1000.0 + ' sec.'
   console.log(logMsg)
   $('#txtAreaStatus').val(logMsg)
   ReceivedMsg = receivedMsg
   LinesAfterMessages = linesAfterMessages
+  FirstDateShown = firstDateShown
+  LastDateShown = lastDateShown
   enableButtons(true, msg.countPhotos)
 }
 
 function communicate(commandText, value){
   enableButtons(false)
+  var pageNo = page_control_get_pageNo()
+  if (commandText.includes('stch_load'))
+    storePageNo(pageNo)
   chrome.extension.getBackgroundPage().last_request_time = new Date()
   console.log("sending "+commandText +" with value="+value)
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, {
       text: commandText, 
-      value: value
+      value: value,
+      pageNo: pageNo,
     }, null)
   })
 }
@@ -193,6 +214,7 @@ function requestMoreHistory(limit){
 
 function enableButtons(enable, cntPhotos=0){
   $('button').attr('disabled', !enable)
+  $('input').attr('disabled', !enable)
   if (enable){
     isShowProgress = false
   }
@@ -248,7 +270,11 @@ function checkConnection(){
   enableButtons(false)
   console.log("Checking connection with main page.")
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {text: 'stch_check_conn', dateFormat: dateFormat}, function(response){
+    chrome.tabs.sendMessage(tabs[0].id, {
+      text: 'stch_check_conn', 
+      dateFormat: dateFormat,
+      pageLimit: pageLimit
+    }, function(response){
       if (undefined != response){
         connectionOK = true
         console.log('connection to main page: ok');
@@ -320,6 +346,11 @@ function chromeSaveAs(blob, fname){
   })
 }
 
+function history_date_range(){
+  var fmt = 'YMD-Hm'
+  return '_from'+formatDateInt(FirstDateShown,fmt)+'_to'+formatDateInt(LastDateShown,fmt)
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   chrome.storage.sync.get(defaultFormatSettings, function(items) {
     initAce()
@@ -339,6 +370,13 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     checkConnection()
+
+    pageLimit = items['pageLimit']
+    page_control_init('#pageControl', function(){
+      requestCurrentHistory()
+    })
+    //restore page No
+    page_control_set_page(chrome.extension.getBackgroundPage().pageNo)
 
     $('#btnOptions').click(function(){
       chrome.runtime.openOptionsPage()
@@ -363,9 +401,9 @@ document.addEventListener('DOMContentLoaded', function() {
       var blob = new Blob([text], {type: "text/plain;charset=utf-8"})
       var dateSave = formatDateForFileName(new Date)
       if (PeerID >=0){
-        chromeSaveAs(blob, "telegram_chat_history__"+NamePeer+"__"+dateSave+".txt")
+        chromeSaveAs(blob, "telegram_chat_history__"+NamePeer+history_date_range()+"__downloaded"+dateSave+".txt")
       }else{
-        chromeSaveAs(blob, "telegram_group_history__"+NamePeer+"__"+dateSave+".txt")
+        chromeSaveAs(blob, "telegram_group_history__"+NamePeer+history_date_range()+"__downloaded"+dateSave+".txt")
       }
     })
 

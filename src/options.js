@@ -33,7 +33,13 @@ function extract_options_from_UI(tableId, keySelected){
 function save_options() {
   var a = extract_options_from_UI('tableFormat', 'formatSelected')
   var b = extract_options_from_UI('tableFormatDate', 'formatDateSelected')
-  var mapFormatOptions = Object.assign({}, a, b)
+
+  var pageLimit = 0
+  var selectedPageLimit = $('input[name="limit"]:checked')
+  if (selectedPageLimit.length>0)
+    pageLimit = selectedPageLimit.val()
+  
+  var mapFormatOptions = Object.assign({}, a, b, {'pageLimit':pageLimit})
   
   chrome.storage.sync.set(mapFormatOptions, function() {
     // Update status to let user know options were saved.
@@ -50,6 +56,9 @@ function render(mapFormats) {
     ['formatCompact', 'formatLarge'],'formatCustom', mapFormats['formatSelected'])
   renderMap(mapFormats, 'tableFormatDate', 
     ['formatDate1', 'formatDate2'],'formatDateCustom', mapFormats['formatDateSelected'])
+  
+  var pageLimit = mapFormats['pageLimit']
+  $("input[name='limit'][value="+pageLimit+"]").attr('checked','checked')
 }
 
 function renderMap(mapValues, tableId, keysToDisplay, customKey, selectedKey, ){
