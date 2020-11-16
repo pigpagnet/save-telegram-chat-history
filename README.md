@@ -5,7 +5,7 @@ Save Telegram Chat History
 Perhaps, many of us like Telegram messenger and use it for conversations with friends. However, we were a bit disappointed by the absence of any sort of easy-accessible "Save Conversation" feature in the messenger. Therefore, we've written a Chrome extension for it! 
 
 ### How It Works
-- Install the Chrome extension ["Save Telegram Chat History"](https://chrome.google.com/webstore/detail/save-telegram-chat-histor/kgldnbjoeinkkgpphaaljlfhfdbndfjc?hl=en). You should now see a new icon in the browser.
+- Install the Chrome extension ["Save Telegram Chat History"](https://chrome.google.com/webstore/detail/save-telegram-chat-histor/kgldnbjoeinkkgpphaaljlfhfdbndfjc?hl=en) *CURRENTLY THE LINK IS NOT WORKING (see Issue #53), YOU NEED TO MANUALLY INSTALL THE EXTENSION* . You should now see a new icon in the browser.
 - Visit https://web.telegram.org.
 - Select a peer you want to get history from.
 - Click on the icon "Save Telegram Chat History".
